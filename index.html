@@ -7,26 +7,48 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- Pixel-style font (DS vibe) -->
+    <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- Background overlay -->
-    <div class="void-bg"></div>
+<div class="void-bg"></div>
 
-    <!-- Title -->
-    <div class="title">
-        SCORPION // THE DEMON
-    </div>
+<div class="title">
+    SCORPION // THE // DEMON
+</div>
 
-    <!-- Stream -->
+<div class="main-layout">
+
+    <!-- STREAM -->
     <div class="stream-container">
         <iframe
             src="https://player.twitch.tv/?channel=scorpionthedemon&parent=scorpionthedemon.github.io"
             allowfullscreen>
         </iframe>
     </div>
+
+    <!-- CHAT STACK -->
+    <div class="chat-container">
+
+        <!-- Twitch Chat -->
+        <iframe
+            src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io">
+        </iframe>
+
+        <!-- YouTube Chat -->
+        <iframe
+            src="https://www.youtube.com/live_chat?v=LIVE_VIDEO_ID&embed_domain=scorpionthedemon.github.io">
+        </iframe>
+
+        <!-- Kick Fallback -->
+        <a href="https://kick.com/scorpionthedemon" target="_blank" class="kick-button">
+            OPEN KICK CHAT
+        </a>
+
+    </div>
+
+</div>
 
 </body>
 </html>
