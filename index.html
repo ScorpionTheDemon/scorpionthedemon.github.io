@@ -10,7 +10,7 @@
 </head>
 <body>
 
-    <!-- DISTORTION WORLD BACKGROUND -->
+    <!-- DISTORTION WORLD CANVAS BACKGROUND -->
     <canvas id="distortionCanvas"></canvas>
 
     <!-- TITLE -->
@@ -44,86 +44,84 @@
     </audio>
 
     <script>
-        // 1️⃣ Handle ambient audio autoplay with user interaction
+        // --- Ambient Music ---
         const ambient = document.getElementById('distortionLoop');
         const twitchIframe = document.getElementById('twitchStream');
 
         const startAmbient = () => {
-            ambient.play().catch(() => console.log("Ambient blocked, waiting for interaction"));
+            ambient.play().catch(()=>console.log("Ambient autoplay blocked."));
             window.removeEventListener('click', startAmbient);
         };
         window.addEventListener('click', startAmbient);
 
-        // 2️⃣ Mute ambient while Twitch stream is loaded
         twitchIframe.onload = () => {
             ambient.muted = true;
         };
 
-        // 3️⃣ Auto-resume ambient if Twitch is not live / iframe not accessible
         setInterval(() => {
             try {
                 const doc = twitchIframe.contentWindow.document;
-                // if accessible, Twitch likely live -> mute
                 ambient.muted = true;
             } catch(e) {
-                // Cross-origin access blocked -> Twitch not live? Resume
-                if (ambient.paused) {
+                if(ambient.paused){
                     ambient.muted = false;
-                    ambient.play().catch(() => console.log("Ambient resume blocked"));
+                    ambient.play().catch(()=>console.log("Ambient resume blocked"));
                 }
             }
         }, 5000);
 
-        // 4️⃣ Dynamic Distortion World background
+        // --- Distortion World Tendrils ---
         const canvas = document.getElementById('distortionCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        const tendrils = [];
-        const NUM_TENDRILS = 25;
-
         class Tendril {
-            constructor() {
-                this.reset();
-            }
-            reset() {
+            constructor(){
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = 50 + Math.random() * 100;
-                this.speedX = -0.2 + Math.random() * 0.4;
-                this.speedY = -0.2 + Math.random() * 0.4;
-                this.angle = Math.random() * Math.PI * 2;
-                this.angularSpeed = 0.001 + Math.random() * 0.003;
-                this.opacity = 0.05 + Math.random() * 0.1;
-                this.color = `rgba(168,85,247,${this.opacity})`;
+                this.length = 200 + Math.random()*300;
+                this.angle = Math.random()*Math.PI*2;
+                this.speed = 0.005 + Math.random()*0.01;
+                this.opacity = 0.05 + Math.random()*0.1;
+                this.width = 2 + Math.random()*4;
             }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.angle += this.angularSpeed;
-                if(this.x < -100 || this.x > canvas.width + 100 || this.y < -100 || this.y > canvas.height + 100) {
-                    this.reset();
-                }
+            update(){
+                this.angle += this.speed;
+                this.x += Math.sin(this.angle)*0.5;
+                this.y += Math.cos(this.angle)*0.5;
+                // wrap around screen
+                if(this.x < -this.length) this.x = canvas.width + this.length;
+                if(this.x > canvas.width + this.length) this.x = -this.length;
+                if(this.y < -this.length) this.y = canvas.height + this.length;
+                if(this.y > canvas.height + this.length) this.y = -this.length;
             }
-            draw() {
+            draw(){
                 ctx.beginPath();
-                ctx.arc(this.x + Math.sin(this.angle)*30, this.y + Math.cos(this.angle)*30, this.size, 0, Math.PI*2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
+                ctx.moveTo(this.x, this.y);
+                const endX = this.x + Math.sin(this.angle)*this.length;
+                const endY = this.y + Math.cos(this.angle)*this.length;
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = `rgba(168,85,247,${this.opacity})`;
+                ctx.lineWidth = this.width;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = 'rgba(180,100,255,0.5)';
+                ctx.stroke();
             }
         }
 
+        const tendrils = [];
+        const NUM_TENDRILS = 30;
         for(let i=0;i<NUM_TENDRILS;i++) tendrils.push(new Tendril());
 
-        function animate() {
+        function animate(){
             ctx.clearRect(0,0,canvas.width,canvas.height);
             tendrils.forEach(t=>{t.update();t.draw();});
             requestAnimationFrame(animate);
         }
         animate();
 
-        window.addEventListener('resize', () => {
+        window.addEventListener('resize', ()=>{
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         });
