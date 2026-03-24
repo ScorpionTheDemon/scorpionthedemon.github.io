@@ -39,19 +39,43 @@
     </div>
 
     <!-- DISTORTION WORLD AMBIENT -->
-    <audio id="distortionLoop" loop autoplay>
+    <audio id="distortionLoop" loop muted>
         <source src="distortion_world_ambient.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        const twitchIframe = document.getElementById('twitchStream');
         const ambient = document.getElementById('distortionLoop');
+        const twitchIframe = document.getElementById('twitchStream');
 
-        // Auto-mute ambient if Twitch stream is playing
-        // (simple check using iframe focus; Twitch API more complex)
+        // 1. Play ambient after first user interaction
+        const playAmbient = () => {
+            ambient.muted = false;
+            ambient.play().catch(err => console.log("Ambient autoplay blocked until user interaction."));
+            window.removeEventListener('click', playAmbient);
+        };
+        window.addEventListener('click', playAmbient);
+
+        // 2. Detect Twitch stream iframe load
         twitchIframe.onload = () => {
             ambient.muted = true;
+            console.log("Ambient muted because Twitch stream loaded");
         };
+
+        // 3. Auto-resume ambient if Twitch stream is not playing
+        // (polling the iframe for "blur" or absence)
+        setInterval(() => {
+            try {
+                const twitchPlayer = twitchIframe.contentWindow.document;
+                // If we can access it, assume Twitch is live -> mute ambient
+                ambient.muted = true;
+            } catch (e) {
+                // Cross-origin error means Twitch iframe not accessible (normal), so resume ambient
+                if (ambient.paused) {
+                    ambient.muted = false;
+                    ambient.play().catch(err => console.log("Ambient resume blocked."));
+                }
+            }
+        }, 5000); // check every 5 seconds
     </script>
 
 </body>
