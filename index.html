@@ -6,49 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="style.css">
-
-    <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="void-bg"></div>
+    <!-- DISTORTION WORLD BACKGROUND -->
+    <div class="void-bg"></div>
 
-<div class="title">
-    SCORPION // THE // DEMON
-</div>
-
-<div class="main-layout">
-
-    <!-- STREAM -->
-    <div class="stream-container">
-        <iframe
-            src="https://player.twitch.tv/?channel=scorpionthedemon&parent=scorpionthedemon.github.io"
-            allowfullscreen>
-        </iframe>
+    <!-- TITLE -->
+    <div class="title">
+        SCORPION // THE // DEMON
     </div>
 
-    <!-- CHAT STACK -->
-    <div class="chat-container">
+    <div class="main-layout">
+
+        <!-- STREAM -->
+        <div class="stream-container">
+            <iframe
+                id="twitchStream"
+                src="https://player.twitch.tv/?channel=scorpionthedemon&parent=scorpionthedemon.github.io"
+                allowfullscreen>
+            </iframe>
+        </div>
 
         <!-- Twitch Chat -->
-        <iframe
-            src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io">
-        </iframe>
-
-        <!-- YouTube Chat -->
-        <iframe
-            src="https://www.youtube.com/live_chat?v=LIVE_VIDEO_ID&embed_domain=scorpionthedemon.github.io">
-        </iframe>
-
-        <!-- Kick Fallback -->
-        <a href="https://kick.com/scorpionthedemon" target="_blank" class="kick-button">
-            OPEN KICK CHAT
-        </a>
+        <div class="chat-container">
+            <iframe
+                src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io">
+            </iframe>
+        </div>
 
     </div>
 
-</div>
+    <!-- DISTORTION WORLD AMBIENT -->
+    <audio id="distortionLoop" loop autoplay>
+        <source src="distortion_world_ambient.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const twitchIframe = document.getElementById('twitchStream');
+        const ambient = document.getElementById('distortionLoop');
+
+        // Auto-mute ambient if Twitch stream is playing
+        // (simple check using iframe focus; Twitch API more complex)
+        twitchIframe.onload = () => {
+            ambient.muted = true;
+        };
+    </script>
 
 </body>
 </html>
