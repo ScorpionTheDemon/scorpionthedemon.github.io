@@ -20,14 +20,20 @@ body {
 /* 🔥 DISTORTION WORLD BACKGROUND */
 .bg {
     position:fixed;
-    width:100%;
-    height:100%;
+    width:110%;
+    height:110%;
+    top:-5%;
+    left:-5%;
+
     background: url("https://cdna.artstation.com/p/assets/images/images/037/369/240/large/caleb-waldrop-joey-mora-screenshot-107.jpg?1620203977") no-repeat center center;
     background-size: cover;
+
     z-index:-2;
 
-    /* subtle movement */
+    /* base animation */
     animation: drift 30s ease-in-out infinite alternate;
+
+    transition: transform 0.2s ease-out;
 }
 
 @keyframes drift {
@@ -36,7 +42,7 @@ body {
     100% { transform: scale(1.05) translate(10px, -10px); }
 }
 
-/* DARK OVERLAY (makes text readable + shadow vibe) */
+/* DARK OVERLAY */
 .overlay {
     position:fixed;
     width:100%;
@@ -124,7 +130,7 @@ body {
 </head>
 <body>
 
-<div class="bg"></div>
+<div class="bg" id="bg"></div>
 <div class="overlay"></div>
 
 <div class="title">
@@ -149,6 +155,17 @@ body {
     </div>
 
 </div>
+
+<script>
+const bg = document.getElementById("bg");
+
+document.addEventListener("mousemove", (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 30;
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
+
+    bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
+});
+</script>
 
 </body>
 </html>
