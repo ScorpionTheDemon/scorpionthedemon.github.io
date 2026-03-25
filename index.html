@@ -44,7 +44,7 @@ body {
     z-index:-1;
 }
 
-/* STACKED TOP SECTION */
+/* STACK */
 .top-stack {
     display:flex;
     flex-direction:column;
@@ -233,7 +233,6 @@ body {
     </div>
 </div>
 
-<!-- FIREBASE + SCRIPT (UNCHANGED LOGIC) -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
@@ -269,15 +268,30 @@ document.getElementById("adminBtn").onclick=()=>{
 </script>
 
 <script>
-// BACKGROUND PARALLAX
-const bg = document.getElementById("bg");
-document.addEventListener("mousemove", e=>{
-  const x=(e.clientX/window.innerWidth-0.5)*30;
-  const y=(e.clientY/window.innerHeight-0.5)*30;
-  bg.style.transform=`scale(1.05) translate(${x}px,${y}px)`;
-});
+// TOKEN CACHE FIX
+let cachedToken = null;
+let tokenExpiry = 0;
 
-// STREAM SYSTEM (UNCHANGED)
+async function token(){
+    const now = Date.now();
+
+    if(cachedToken && now < tokenExpiry){
+        return cachedToken;
+    }
+
+    const r = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {
+        method:"POST"
+    });
+
+    const data = await r.json();
+
+    cachedToken = data.access_token;
+    tokenExpiry = now + (data.expires_in - 60) * 1000;
+
+    return cachedToken;
+}
+
+// STREAM SYSTEM
 const CLIENT_ID="fiymv8n5jpz24y9xzj471pp1kvqvc5";
 const CLIENT_SECRET="9arqj32z9d5owge40cngaakm6fwa75";
 const MAIN_CHANNEL="scorpionthedemon";
@@ -295,11 +309,6 @@ const yt=`https://www.youtube.com/embed?listType=playlist&list=${playlist}&autop
 
 player.src=yt;
 chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
-
-async function token(){
- const r=await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`,{method:"POST"});
- return (await r.json()).access_token;
-}
 
 function shuffle(a){return a.sort(()=>Math.random()-0.5);}
 
