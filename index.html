@@ -132,8 +132,6 @@ body {
 
 /* BULLETIN */
 .bulletin {
-    position:absolute;
-    top:300px;
     width:100%;
     text-align:center;
     font-size:14px;
@@ -142,6 +140,39 @@ body {
         0 0 5px #a855f7,
         0 0 15px #7e22ce,
         0 0 30px #4c1d95;
+    margin-top:300px;
+}
+
+/* Bulletin input (visible only to you) */
+.bulletin-input {
+    width:65vw;
+    max-width:1100px;
+    margin:10px auto;
+    display:flex;
+    justify-content:center;
+    gap:5px;
+}
+
+.bulletin-input input {
+    flex:1;
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    padding:5px;
+    border:2px solid #7e22ce;
+    border-radius:4px;
+    background:black;
+    color:#c084ff;
+}
+
+.bulletin-input button {
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    padding:5px 10px;
+    border:2px solid #7e22ce;
+    border-radius:4px;
+    background:#1f0d3a;
+    color:#c084ff;
+    cursor:pointer;
 }
 
 /* PLAYER TITLE */
@@ -225,8 +256,14 @@ body {
     <img class="clone right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
 </div>
 
-<!-- Bulletin -->
+<!-- Bulletin display -->
 <div class="bulletin" id="bulletin"></div>
+
+<!-- Bulletin input for owner -->
+<div class="bulletin-input" id="bulletinInput">
+    <input type="text" id="bulletinText" placeholder="Enter bulletin message">
+    <button onclick="postBulletin()">Update Bulletin</button>
+</div>
 
 <div class="main-layout">
 
@@ -266,6 +303,11 @@ function updateBulletin(message, user="owner"){
     if(user==="owner"){
         db.ref('bulletin').set({ message: message });
     }
+}
+function postBulletin(){
+    const msg = document.getElementById("bulletinText").value.trim();
+    if(msg) updateBulletin(msg,"owner");
+    document.getElementById("bulletinText").value = "";
 }
 
 /* Twitch + YouTube switching */
