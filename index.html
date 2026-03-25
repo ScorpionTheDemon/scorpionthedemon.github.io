@@ -58,12 +58,11 @@ body {
         0 0 5px #a855f7,
         0 0 15px #7e22ce,
         0 0 30px #4c1d95;
+    z-index:1;
 }
 
 /* PLAYER TITLE BAR */
 .player-title {
-    position:absolute;
-    top:120px;
     width:100%;
     text-align:center;
     font-size:12px;
@@ -73,7 +72,7 @@ body {
         0 0 5px #a855f7,
         0 0 15px #7e22ce,
         0 0 30px #4c1d95;
-    z-index:1;
+    margin-bottom:5px;
 }
 
 /* GIRATINA */
@@ -83,6 +82,7 @@ body {
     width:100%;
     display:flex;
     justify-content:center;
+    z-index:0;
 }
 
 .clone {
@@ -132,10 +132,11 @@ body {
 .main-layout {
     display:flex;
     justify-content:center;
-    align-items:center;
+    align-items:flex-start;
+    flex-direction:column;
     height:100vh;
-    gap:20px;
-    padding-top:140px;
+    gap:10px;
+    padding-top:160px;
 }
 
 .stream-container {
@@ -167,7 +168,7 @@ body {
 
 /* MOBILE */
 @media(max-width:900px){
-    .main-layout {flex-direction:column;}
+    .main-layout {flex-direction:column; align-items:center;}
     .stream-container {width:95vw;}
     .chat-container {width:95vw;height:400px;}
 }
@@ -181,26 +182,21 @@ body {
 <div class="overlay"></div>
 
 <div class="title">SCORPION // THE // DEMON</div>
-<div class="player-title" id="playerTitle">Loading...</div>
+
+<div class="main-layout">
+    <div class="player-title" id="playerTitle">Loading...</div>
+    <div class="stream-container">
+        <iframe id="mainPlayer" allowfullscreen></iframe>
+    </div>
+    <div class="chat-container">
+        <iframe id="chatFrame" src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout" ></iframe>
+    </div>
+</div>
 
 <div class="giratina-gif">
     <img class="clone left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
     <img id="giratinaImg" class="giratina-main" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
     <img class="clone right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
-</div>
-
-<div class="main-layout">
-
-```
-<div class="stream-container">
-    <iframe id="mainPlayer" allowfullscreen></iframe>
-</div>
-
-<div class="chat-container">
-    <iframe id="chatFrame" src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout" ></iframe>
-</div>
-```
-
 </div>
 
 <script>
