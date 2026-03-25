@@ -60,6 +60,22 @@ body {
         0 0 30px #4c1d95;
 }
 
+/* PLAYER TITLE BAR */
+.player-title {
+    position:absolute;
+    top:120px;
+    width:100%;
+    text-align:center;
+    font-size:12px;
+    letter-spacing:2px;
+    color:#c084ff;
+    text-shadow:
+        0 0 5px #a855f7,
+        0 0 15px #7e22ce,
+        0 0 30px #4c1d95;
+    z-index:1;
+}
+
 /* GIRATINA */
 .giratina-gif {
     position:absolute;
@@ -165,6 +181,7 @@ body {
 <div class="overlay"></div>
 
 <div class="title">SCORPION // THE // DEMON</div>
+<div class="player-title" id="playerTitle">Loading...</div>
 
 <div class="giratina-gif">
     <img class="clone left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
@@ -180,7 +197,7 @@ body {
 </div>
 
 <div class="chat-container">
-    <iframe src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout" ></iframe>
+    <iframe id="chatFrame" src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout" ></iframe>
 </div>
 ```
 
@@ -206,11 +223,14 @@ const CHANNELS = [
 ];
 
 const player = document.getElementById("mainPlayer");
-const chatFrame = document.querySelector('.chat-container iframe');
+const chatFrame = document.getElementById("chatFrame");
+const playerTitle = document.getElementById("playerTitle");
 
 // YouTube playlist fix: loop all videos
-const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
-player.src = youtubeEmbed; // start default
+const youtubePlaylistID = "PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
+const youtubeEmbed = `https://www.youtube.com/embed?listType=playlist&list=${youtubePlaylistID}&autoplay=1&mute=1&loop=1&playlist=${youtubePlaylistID}`;
+player.src = youtubeEmbed;
+playerTitle.textContent = "YouTube Playlist";
 
 async function getAccessToken() {
     const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, { method: "POST" });
@@ -236,15 +256,16 @@ async function checkLive() {
                 if (!player.src.includes(channel)) {
                     player.src = twitchEmbed;
                     chatFrame.src = chatEmbed;
+                    playerTitle.textContent = `${channel} Twitch Stream`;
                 }
-                return; // stop at the first live channel
+                return;
             }
         }
 
-        // If none live, show YouTube
         if (!player.src.includes("youtube.com")) {
             player.src = youtubeEmbed;
             chatFrame.src = `https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout`;
+            playerTitle.textContent = "YouTube Playlist";
         }
 
     } catch (err) {
@@ -252,12 +273,13 @@ async function checkLive() {
         if (!player.src.includes("youtube.com")) {
             player.src = youtubeEmbed;
             chatFrame.src = `https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout`;
+            playerTitle.textContent = "YouTube Playlist";
         }
     }
 }
 
-setInterval(checkLive, 60000); // check every 60s
-checkLive(); // initial check
+setInterval(checkLive, 60000);
+checkLive();
 
 </script>
 
