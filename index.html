@@ -11,7 +11,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <script>
-  // Your Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyB2cWCYGCDJuSaBpgbm0Mpu7-Q8ucsLGEA",
     authDomain: "scorpionthedemon-website.firebaseapp.com",
@@ -163,10 +162,18 @@ body {
 .main-layout {
     display:flex;
     justify-content:center;
-    align-items:center;
+    align-items:flex-start;
     height:100vh;
     gap:20px;
-    padding-top:140px;
+    padding-top:400px;
+    flex-direction: row;
+}
+
+.stream-wrapper {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:5px;
 }
 
 .stream-container {
@@ -198,7 +205,7 @@ body {
 
 /* MOBILE */
 @media(max-width:900px){
-    .main-layout {flex-direction:column;}
+    .main-layout {flex-direction:column; align-items:center;}
     .stream-container {width:95vw;}
     .chat-container {width:95vw;height:400px;}
 }
@@ -219,25 +226,24 @@ body {
 </div>
 
 <!-- Bulletin -->
-<div class="bulletin" id="bulletin">Welcome to the stream!</div>
-
-<!-- Player title -->
-<div class="player-title" id="playerTitle">Loading...</div>
+<div class="bulletin" id="bulletin"></div>
 
 <div class="main-layout">
 
-    <div class="stream-container">
-        <iframe id="mainPlayer" allowfullscreen></iframe>
+    <div class="stream-wrapper">
+        <div class="player-title" id="playerTitle">Loading...</div>
+        <div class="stream-container">
+            <iframe id="mainPlayer" allowfullscreen></iframe>
+        </div>
     </div>
 
-    <div class="chat-container">
-        <iframe src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout"></iframe>
+    <div class="chat-container" id="chatContainer">
+        <iframe id="chatFrame" src="" allowfullscreen></iframe>
     </div>
 
 </div>
 
 <script>
-
 /* Mouse reactive background */
 const bg = document.getElementById("bg");
 document.addEventListener("mousemove", (e) => {
@@ -246,50 +252,38 @@ document.addEventListener("mousemove", (e) => {
     bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
 });
 
-/* Twitch + YouTube switching with friends */
-const CLIENT_ID = "fiymv8n5jpz24y9xzj471pp1kvqvc5";
-const CLIENT_SECRET = "9arqj32z9d5owge40cngaakm6fwa75";
-
-// Twitch channels priority
-const CHANNELS = [
-    "scorpionthedemon",
-    "marggyonvt",
-    "idollplushie",
-    "uwoslab"
-];
-
-const twitchEmbed = (channel) => `https://player.twitch.tv/?channel=${channel}&parent=scorpionthedemon.github.io`;
-const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
-
-const player = document.getElementById("mainPlayer");
-const playerTitle = document.getElementById("playerTitle");
-
-player.src = youtubeEmbed;
-playerTitle.textContent = "YouTube Playlist";
-
-/* Firebase bulletin */
+/* Firebase Bulletin */
 const bulletin = document.getElementById("bulletin");
-
-// Listen for changes in Firebase
 db.ref('bulletin').on('value', (snapshot) => {
     const data = snapshot.val();
     if(data && data.message){
         bulletin.textContent = data.message;
+    } else {
+        bulletin.textContent = "";
     }
 });
-
-// Only you (owner) can update
 function updateBulletin(message, user="owner"){
     if(user==="owner"){
         db.ref('bulletin').set({ message: message });
     }
 }
 
-/* Twitch live check */
+/* Twitch + YouTube switching */
+const CLIENT_ID = "fiymv8n5jpz24y9xzj471pp1kvqvc5";
+const CLIENT_SECRET = "9arqj32z9d5owge40cngaakm6fwa75";
+const CHANNELS = ["scorpionthedemon","marggyonvt","idollplushie","uwoslab"];
+
+const player = document.getElementById("mainPlayer");
+const playerTitle = document.getElementById("playerTitle");
+const chatContainer = document.getElementById("chatContainer");
+const chatFrame = document.getElementById("chatFrame");
+
+const twitchEmbed = (channel) => `https://player.twitch.tv/?channel=${channel}&parent=scorpionthedemon.github.io`;
+const chatEmbed = (channel) => `https://www.twitch.tv/embed/${channel}/chat?parent=scorpionthedemon.github.io&darkpopout`;
+const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
+
 async function getAccessToken() {
-    const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {
-        method: "POST"
-    });
+    const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, { method:"POST" });
     const data = await res.json();
     return data.access_token;
 }
@@ -297,41 +291,47 @@ async function getAccessToken() {
 async function checkLive() {
     try {
         const token = await getAccessToken();
+        let liveFound = false;
+
         for(const channel of CHANNELS){
             const res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${channel}`, {
-                headers: {
-                    "Client-ID": CLIENT_ID,
-                    "Authorization": `Bearer ${token}`
-                }
+                headers: {"Client-ID": CLIENT_ID, "Authorization": `Bearer ${token}`}
             });
             const data = await res.json();
             if(data.data && data.data.length>0){
-                // live stream found
-                if(!player.src.includes("twitch.tv") || !player.src.includes(channel)){
+                // Live stream found
+                if(!player.src.includes(channel)){
                     player.src = twitchEmbed(channel);
                     playerTitle.textContent = `Twitch: ${channel}`;
+                    chatFrame.src = chatEmbed(channel);
+                    chatContainer.style.display = "block";
                 }
-                return; // stop checking once first live found
+                liveFound = true;
+                break;
             }
         }
-        // If none live, show YouTube
-        if(!player.src.includes("youtube.com")){
-            player.src = youtubeEmbed;
-            playerTitle.textContent = "YouTube Playlist";
+
+        if(!liveFound){
+            if(!player.src.includes("youtube.com")){
+                player.src = youtubeEmbed;
+                playerTitle.textContent = "YouTube Playlist";
+                chatContainer.style.display = "none";
+            }
         }
+
     } catch(err){
         console.error(err);
         if(!player.src.includes("youtube.com")){
             player.src = youtubeEmbed;
             playerTitle.textContent = "YouTube Playlist";
+            chatContainer.style.display = "none";
         }
     }
 }
 
-// Check immediately and every 60 seconds
+// Initial load
 checkLive();
 setInterval(checkLive, 60000);
-
 </script>
 
 </body>
