@@ -199,7 +199,9 @@ const CLIENT_SECRET = "9arqj32z9d5owge40cngaakm6fwa75";
 const CHANNEL = "scorpionthedemon";
 
 const twitchEmbed = `https://player.twitch.tv/?channel=${CHANNEL}&parent=scorpionthedemon.github.io`;
-const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1";
+
+// Fixed YouTube playlist URL: added &playlist=<same playlist ID> to loop properly
+const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
 
 const player = document.getElementById("mainPlayer");
 
