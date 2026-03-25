@@ -73,6 +73,8 @@ body {
         0 0 15px #7e22ce,
         0 0 30px #4c1d95;
     margin-bottom:5px;
+    position:relative;
+    z-index:1;
 }
 
 /* GIRATINA */
@@ -132,11 +134,16 @@ body {
 .main-layout {
     display:flex;
     justify-content:center;
-    align-items:flex-start;
-    flex-direction:column;
+    align-items:center;
     height:100vh;
-    gap:10px;
-    padding-top:160px;
+    gap:20px;
+    padding-top:140px;
+}
+
+.player-container {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
 }
 
 .stream-container {
@@ -168,7 +175,7 @@ body {
 
 /* MOBILE */
 @media(max-width:900px){
-    .main-layout {flex-direction:column; align-items:center;}
+    .main-layout {flex-direction:column;}
     .stream-container {width:95vw;}
     .chat-container {width:95vw;height:400px;}
 }
@@ -184,12 +191,14 @@ body {
 <div class="title">SCORPION // THE // DEMON</div>
 
 <div class="main-layout">
-    <div class="player-title" id="playerTitle">Loading...</div>
-    <div class="stream-container">
-        <iframe id="mainPlayer" allowfullscreen></iframe>
+    <div class="player-container">
+        <div class="player-title" id="playerTitle">Loading...</div>
+        <div class="stream-container">
+            <iframe id="mainPlayer" allowfullscreen></iframe>
+        </div>
     </div>
     <div class="chat-container">
-        <iframe id="chatFrame" src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout" ></iframe>
+        <iframe id="chatFrame" src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout"></iframe>
     </div>
 </div>
 
