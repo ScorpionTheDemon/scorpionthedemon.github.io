@@ -17,7 +17,7 @@ body {
     background:black;
 }
 
-/* 🔥 BACKGROUND */
+/* BACKGROUND */
 .bg {
     position:fixed;
     width:110%;
@@ -37,7 +37,6 @@ body {
     100% { transform: scale(1.05) translate(10px, -10px); }
 }
 
-/* OVERLAY */
 .overlay {
     position:fixed;
     width:100%;
@@ -61,66 +60,56 @@ body {
         0 0 30px #4c1d95;
 }
 
-/* 🔥 GIRATINA CONTAINER */
+/* GIRATINA */
 .giratina-gif {
     position:absolute;
     top:60px;
     width:100%;
     display:flex;
     justify-content:center;
-    pointer-events:none;
 }
 
-/* SHADOW CLONES */
 .clone {
     position:absolute;
     width:180px;
-    max-width:40vw;
     opacity:0.25;
     filter: blur(4px) drop-shadow(0 0 20px #7e22ce);
 }
 
-/* left clone */
 .clone.left {
-    transform: translateX(-40px) scale(1.05);
+    transform: translateX(-40px);
     animation: floatCloneLeft 7s ease-in-out infinite;
 }
 
-/* right clone */
 .clone.right {
-    transform: translateX(40px) scale(1.05);
+    transform: translateX(40px);
     animation: floatCloneRight 8s ease-in-out infinite;
 }
 
 @keyframes floatCloneLeft {
-    0% { transform: translateX(-40px) translateY(0px); }
+    0% { transform: translateX(-40px) translateY(0); }
     50% { transform: translateX(-50px) translateY(-10px); }
-    100% { transform: translateX(-40px) translateY(0px); }
+    100% { transform: translateX(-40px) translateY(0); }
 }
 
 @keyframes floatCloneRight {
-    0% { transform: translateX(40px) translateY(0px); }
+    0% { transform: translateX(40px) translateY(0); }
     50% { transform: translateX(50px) translateY(-12px); }
-    100% { transform: translateX(40px) translateY(0px); }
+    100% { transform: translateX(40px) translateY(0); }
 }
 
-/* MAIN GIRATINA */
 .giratina-main {
     width:180px;
-    max-width:40vw;
-    opacity:0.95;
-
     filter:
         drop-shadow(0 0 10px #a855f7)
         drop-shadow(0 0 25px #7e22ce);
-
     animation: floatMain 6s ease-in-out infinite;
 }
 
 @keyframes floatMain {
-    0% { transform: translateY(0px); }
+    0% { transform: translateY(0); }
     50% { transform: translateY(-12px); }
-    100% { transform: translateY(0px); }
+    100% { transform: translateY(0); }
 }
 
 /* LAYOUT */
@@ -133,7 +122,6 @@ body {
     padding-top:140px;
 }
 
-/* STREAM */
 .stream-container {
     width:65vw;
     max-width:1100px;
@@ -142,10 +130,6 @@ body {
     border-radius:12px;
     overflow:hidden;
     background:black;
-
-    box-shadow:
-        0 0 30px rgba(168,85,247,0.5),
-        inset 0 0 20px rgba(0,0,0,0.8);
 }
 
 .stream-container iframe {
@@ -154,7 +138,6 @@ body {
     border:none;
 }
 
-/* CHAT */
 .chat-container {
     width:300px;
     height:65vh;
@@ -164,24 +147,13 @@ body {
     width:100%;
     height:100%;
     border:2px solid #7e22ce;
-    background:black;
 }
 
 /* MOBILE */
 @media(max-width:900px){
-    .main-layout {
-        flex-direction:column;
-        padding-top:160px;
-    }
-
-    .stream-container {
-        width:95vw;
-    }
-
-    .chat-container {
-        width:95vw;
-        height:400px;
-    }
+    .main-layout {flex-direction:column;}
+    .stream-container {width:95vw;}
+    .chat-container {width:95vw;height:400px;}
 }
 
 </style>
@@ -191,61 +163,82 @@ body {
 <div class="bg" id="bg"></div>
 <div class="overlay"></div>
 
-<div class="title">
-    SCORPION // THE // DEMON
-</div>
+<div class="title">SCORPION // THE // DEMON</div>
 
-<!-- 🔥 GIRATINA + SHADOW CLONES -->
 <div class="giratina-gif">
-
-    <img class="clone left"
-         src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
-
-    <img id="giratinaImg"
-         class="giratina-main"
-         src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif"
-         alt="Giratina">
-
-    <img class="clone right"
-         src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
-
+    <img class="clone left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
+    <img id="giratinaImg" class="giratina-main" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
+    <img class="clone right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
 </div>
 
 <div class="main-layout">
 
-    <!-- STREAM -->
     <div class="stream-container">
-        <iframe
-            src="https://player.twitch.tv/?channel=scorpionthedemon&parent=scorpionthedemon.github.io"
-            allowfullscreen>
-        </iframe>
+        <iframe id="mainPlayer" allowfullscreen></iframe>
     </div>
 
-    <!-- CHAT -->
     <div class="chat-container">
-        <iframe
-            src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io">
-        </iframe>
+        <iframe src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io"></iframe>
     </div>
 
 </div>
 
 <script>
+
 /* Mouse reactive background */
 const bg = document.getElementById("bg");
-
 document.addEventListener("mousemove", (e) => {
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
     const y = (e.clientY / window.innerHeight - 0.5) * 30;
-
     bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
 });
 
-/* Fallback image */
-const img = document.getElementById("giratinaImg");
-img.onerror = () => {
-    img.src = "https://play.pokemonshowdown.com/sprites/gen5ani/giratina-origin.gif";
-};
+/* Twitch + YouTube switching */
+const CLIENT_ID = "fiymv8n5jpz24y9xzj471pp1kvqvc5";
+const CLIENT_SECRET = "9arqj32z9d5owge40cngaakm6fwa75";
+const CHANNEL = "scorpionthedemon";
+
+const twitchEmbed = `https://player.twitch.tv/?channel=${CHANNEL}&parent=scorpionthedemon.github.io`;
+const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1";
+
+const player = document.getElementById("mainPlayer");
+
+async function getAccessToken() {
+    const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {
+        method: "POST"
+    });
+    const data = await res.json();
+    return data.access_token;
+}
+
+async function checkLive() {
+    try {
+        const token = await getAccessToken();
+
+        const res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${CHANNEL}`, {
+            headers: {
+                "Client-ID": CLIENT_ID,
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+
+        if (data.data && data.data.length > 0) {
+            player.src = twitchEmbed;
+        } else {
+            player.src = youtubeEmbed;
+        }
+
+    } catch (err) {
+        console.error(err);
+        player.src = youtubeEmbed;
+    }
+}
+
+checkLive();
+setInterval(checkLive, 60000);
+
 </script>
 
 </body>
