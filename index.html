@@ -180,7 +180,7 @@ body {
 </div>
 
 <div class="chat-container">
-    <iframe src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io"></iframe>
+    <iframe src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout" ></iframe>
 </div>
 ```
 
@@ -206,6 +206,7 @@ const CHANNELS = [
 ];
 
 const player = document.getElementById("mainPlayer");
+const chatFrame = document.querySelector('.chat-container iframe');
 
 // YouTube playlist fix: loop all videos
 const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
@@ -231,8 +232,10 @@ async function checkLive() {
             const data = await res.json();
             if (data.data && data.data.length > 0) {
                 const twitchEmbed = `https://player.twitch.tv/?channel=${channel}&parent=scorpionthedemon.github.io`;
+                const chatEmbed = `https://www.twitch.tv/embed/${channel}/chat?parent=scorpionthedemon.github.io&darkpopout`;
                 if (!player.src.includes(channel)) {
                     player.src = twitchEmbed;
+                    chatFrame.src = chatEmbed;
                 }
                 return; // stop at the first live channel
             }
@@ -241,12 +244,14 @@ async function checkLive() {
         // If none live, show YouTube
         if (!player.src.includes("youtube.com")) {
             player.src = youtubeEmbed;
+            chatFrame.src = `https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout`;
         }
 
     } catch (err) {
         console.error(err);
         if (!player.src.includes("youtube.com")) {
             player.src = youtubeEmbed;
+            chatFrame.src = `https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout`;
         }
     }
 }
