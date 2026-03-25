@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +7,27 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyB2cWCYGCDJuSaBpgbm0Mpu7-Q8ucsLGEA",
+    authDomain: "scorpionthedemon-website.firebaseapp.com",
+    databaseURL: "https://scorpionthedemon-website-default-rtdb.firebaseio.com",
+    projectId: "scorpionthedemon-website",
+    storageBucket: "scorpionthedemon-website.firebasestorage.app",
+    messagingSenderId: "1013538876770",
+    appId: "1:1013538876770:web:88874fecec0b606e14503b",
+    measurementId: "G-FDDRD74GM1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
+
 <style>
+
 /* RESET */
 * {margin:0; padding:0; box-sizing:border-box;}
 body {
@@ -58,23 +77,6 @@ body {
         0 0 5px #a855f7,
         0 0 15px #7e22ce,
         0 0 30px #4c1d95;
-    z-index:1;
-}
-
-/* PLAYER TITLE BAR */
-.player-title {
-    width:100%;
-    text-align:center;
-    font-size:12px;
-    letter-spacing:2px;
-    color:#c084ff;
-    text-shadow:
-        0 0 5px #a855f7,
-        0 0 15px #7e22ce,
-        0 0 30px #4c1d95;
-    margin-bottom:5px;
-    position:relative;
-    z-index:1;
 }
 
 /* GIRATINA */
@@ -84,7 +86,6 @@ body {
     width:100%;
     display:flex;
     justify-content:center;
-    z-index:0;
 }
 
 .clone {
@@ -130,6 +131,34 @@ body {
     100% { transform: translateY(0); }
 }
 
+/* BULLETIN */
+.bulletin {
+    position:absolute;
+    top:300px;
+    width:100%;
+    text-align:center;
+    font-size:14px;
+    color:#c084ff;
+    text-shadow:
+        0 0 5px #a855f7,
+        0 0 15px #7e22ce,
+        0 0 30px #4c1d95;
+}
+
+/* PLAYER TITLE */
+.player-title {
+    width:65vw;
+    max-width:1100px;
+    text-align:center;
+    margin:0 auto 10px;
+    font-size:14px;
+    color:#c084ff;
+    text-shadow:
+        0 0 5px #a855f7,
+        0 0 15px #7e22ce,
+        0 0 30px #4c1d95;
+}
+
 /* LAYOUT */
 .main-layout {
     display:flex;
@@ -138,12 +167,6 @@ body {
     height:100vh;
     gap:20px;
     padding-top:140px;
-}
-
-.player-container {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
 }
 
 .stream-container {
@@ -181,7 +204,6 @@ body {
 }
 
 </style>
-
 </head>
 <body>
 
@@ -190,25 +212,32 @@ body {
 
 <div class="title">SCORPION // THE // DEMON</div>
 
-<div class="main-layout">
-    <div class="player-container">
-        <div class="player-title" id="playerTitle">Loading...</div>
-        <div class="stream-container">
-            <iframe id="mainPlayer" allowfullscreen></iframe>
-        </div>
-    </div>
-    <div class="chat-container">
-        <iframe id="chatFrame" src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout"></iframe>
-    </div>
-</div>
-
 <div class="giratina-gif">
     <img class="clone left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
     <img id="giratinaImg" class="giratina-main" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
     <img class="clone right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
 </div>
 
+<!-- Bulletin -->
+<div class="bulletin" id="bulletin">Welcome to the stream!</div>
+
+<!-- Player title -->
+<div class="player-title" id="playerTitle">Loading...</div>
+
+<div class="main-layout">
+
+    <div class="stream-container">
+        <iframe id="mainPlayer" allowfullscreen></iframe>
+    </div>
+
+    <div class="chat-container">
+        <iframe src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout"></iframe>
+    </div>
+
+</div>
+
 <script>
+
 /* Mouse reactive background */
 const bg = document.getElementById("bg");
 document.addEventListener("mousemove", (e) => {
@@ -217,9 +246,11 @@ document.addEventListener("mousemove", (e) => {
     bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
 });
 
-/* Twitch + YouTube switching with friends priority */
+/* Twitch + YouTube switching with friends */
 const CLIENT_ID = "fiymv8n5jpz24y9xzj471pp1kvqvc5";
 const CLIENT_SECRET = "9arqj32z9d5owge40cngaakm6fwa75";
+
+// Twitch channels priority
 const CHANNELS = [
     "scorpionthedemon",
     "marggyonvt",
@@ -227,18 +258,38 @@ const CHANNELS = [
     "uwoslab"
 ];
 
+const twitchEmbed = (channel) => `https://player.twitch.tv/?channel=${channel}&parent=scorpionthedemon.github.io`;
+const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
+
 const player = document.getElementById("mainPlayer");
-const chatFrame = document.getElementById("chatFrame");
 const playerTitle = document.getElementById("playerTitle");
 
-// YouTube playlist fix: loop all videos
-const youtubePlaylistID = "PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
-const youtubeEmbed = `https://www.youtube.com/embed?listType=playlist&list=${youtubePlaylistID}&autoplay=1&mute=1&loop=1&playlist=${youtubePlaylistID}`;
 player.src = youtubeEmbed;
 playerTitle.textContent = "YouTube Playlist";
 
+/* Firebase bulletin */
+const bulletin = document.getElementById("bulletin");
+
+// Listen for changes in Firebase
+db.ref('bulletin').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if(data && data.message){
+        bulletin.textContent = data.message;
+    }
+});
+
+// Only you (owner) can update
+function updateBulletin(message, user="owner"){
+    if(user==="owner"){
+        db.ref('bulletin').set({ message: message });
+    }
+}
+
+/* Twitch live check */
 async function getAccessToken() {
-    const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, { method: "POST" });
+    const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {
+        method: "POST"
+    });
     const data = await res.json();
     return data.access_token;
 }
@@ -246,8 +297,7 @@ async function getAccessToken() {
 async function checkLive() {
     try {
         const token = await getAccessToken();
-
-        for (const channel of CHANNELS) {
+        for(const channel of CHANNELS){
             const res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${channel}`, {
                 headers: {
                     "Client-ID": CLIENT_ID,
@@ -255,36 +305,32 @@ async function checkLive() {
                 }
             });
             const data = await res.json();
-            if (data.data && data.data.length > 0) {
-                const twitchEmbed = `https://player.twitch.tv/?channel=${channel}&parent=scorpionthedemon.github.io`;
-                const chatEmbed = `https://www.twitch.tv/embed/${channel}/chat?parent=scorpionthedemon.github.io&darkpopout`;
-                if (!player.src.includes(channel)) {
-                    player.src = twitchEmbed;
-                    chatFrame.src = chatEmbed;
-                    playerTitle.textContent = `${channel} Twitch Stream`;
+            if(data.data && data.data.length>0){
+                // live stream found
+                if(!player.src.includes("twitch.tv") || !player.src.includes(channel)){
+                    player.src = twitchEmbed(channel);
+                    playerTitle.textContent = `Twitch: ${channel}`;
                 }
-                return;
+                return; // stop checking once first live found
             }
         }
-
-        if (!player.src.includes("youtube.com")) {
+        // If none live, show YouTube
+        if(!player.src.includes("youtube.com")){
             player.src = youtubeEmbed;
-            chatFrame.src = `https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout`;
             playerTitle.textContent = "YouTube Playlist";
         }
-
-    } catch (err) {
+    } catch(err){
         console.error(err);
-        if (!player.src.includes("youtube.com")) {
+        if(!player.src.includes("youtube.com")){
             player.src = youtubeEmbed;
-            chatFrame.src = `https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout`;
             playerTitle.textContent = "YouTube Playlist";
         }
     }
 }
 
-setInterval(checkLive, 60000);
+// Check immediately and every 60 seconds
 checkLive();
+setInterval(checkLive, 60000);
 
 </script>
 
