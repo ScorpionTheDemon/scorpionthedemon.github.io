@@ -60,6 +60,38 @@ body {
         0 0 30px #4c1d95;
 }
 
+/* PLAYER TITLE BAR */
+.player-title {
+    position:absolute;
+    top:300px; /* below Giratina */
+    width:100%;
+    text-align:center;
+    font-size:14px;
+    letter-spacing:2px;
+    color:#c084ff;
+    text-shadow:
+        0 0 5px #a855f7,
+        0 0 15px #7e22ce,
+        0 0 30px #4c1d95;
+    z-index:1;
+}
+
+/* BULLETIN */
+.bulletin {
+    position:absolute;
+    top:260px; /* below Giratina but above player */
+    width:100%;
+    text-align:center;
+    font-size:14px;
+    letter-spacing:2px;
+    color:#c084ff;
+    text-shadow:
+        0 0 5px #a855f7,
+        0 0 15px #7e22ce,
+        0 0 30px #4c1d95;
+    z-index:1;
+}
+
 /* GIRATINA */
 .giratina-gif {
     position:absolute;
@@ -67,6 +99,7 @@ body {
     width:100%;
     display:flex;
     justify-content:center;
+    z-index:1;
 }
 
 .clone {
@@ -112,60 +145,14 @@ body {
     100% { transform: translateY(0); }
 }
 
-/* BULLETIN */
-.bulletin {
-    position:absolute;
-    top:280px;
-    width:100%;
-    text-align:center;
-    font-size:12px;
-    color:#c084ff;
-    letter-spacing:2px;
-    text-shadow:
-        0 0 5px #a855f7,
-        0 0 15px #7e22ce,
-        0 0 30px #4c1d95;
-    z-index:1;
-}
-
-/* PLAYER TITLE */
-.player-title {
-    position:absolute;
-    width:100%;
-    text-align:center;
-    font-size:12px;
-    color:#c084ff;
-    letter-spacing:2px;
-    text-shadow:
-        0 0 5px #a855f7,
-        0 0 15px #7e22ce,
-        0 0 30px #4c1d95;
-    top:320px;
-}
-
-/* ADMIN BUTTON */
-#adminButton {
-    position:absolute;
-    top:250px;
-    left:50%;
-    transform:translateX(-50%);
-    font-family:'Press Start 2P', monospace;
-    color:#c084ff;
-    background:black;
-    border:3px solid #7e22ce;
-    padding:5px 10px;
-    cursor:pointer;
-    z-index:1;
-}
-
 /* LAYOUT */
 .main-layout {
     display:flex;
     justify-content:center;
-    align-items:flex-start;
-    height:calc(100vh - 360px);
+    align-items:center;
+    height:calc(100vh - 380px);
     gap:20px;
-    padding-top:360px;
+    padding-top:380px; /* moves layout below Giratina + bulletin */
 }
 
 .stream-container {
@@ -195,14 +182,35 @@ body {
     border:2px solid #7e22ce;
 }
 
+/* ADMIN BUTTON */
+.admin-btn {
+    position:absolute;
+    top:230px;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    color:#c084ff;
+    text-shadow:
+        0 0 5px #a855f7,
+        0 0 15px #7e22ce,
+        0 0 30px #4c1d95;
+    background:transparent;
+    border:2px solid #7e22ce;
+    border-radius:8px;
+    padding:4px 10px;
+    cursor:pointer;
+    z-index:1;
+}
+
 /* MOBILE */
 @media(max-width:900px){
-    .main-layout {flex-direction:column; padding-top:400px;}
+    .main-layout {flex-direction:column; padding-top:420px; height:auto;}
     .stream-container {width:95vw;}
     .chat-container {width:95vw;height:400px;}
-    .bulletin {top:320px;}
     .player-title {top:360px;}
-    #adminButton {top:300px;}
+    .bulletin {top:320px;}
+    .admin-btn {top:300px;}
 }
 
 </style>
@@ -220,12 +228,16 @@ body {
     <img class="clone right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
 </div>
 
-<div class="bulletin" id="bulletin">No messages currently</div>
-<button id="adminButton">Admin Log In</button>
-<div class="player-title" id="playerTitle">Loading...</div>
+<!-- Bulletin -->
+<div class="bulletin" id="bulletin"></div>
+
+<!-- Admin login button -->
+<button class="admin-btn" id="adminBtn">Admin Log In</button>
+
+<!-- Player title -->
+<div class="player-title" id="playerTitle">YouTube Playlist Active</div>
 
 <div class="main-layout">
-
     <div class="stream-container">
         <iframe id="mainPlayer" allowfullscreen></iframe>
     </div>
@@ -233,21 +245,12 @@ body {
     <div class="chat-container">
         <iframe id="chatFrame"></iframe>
     </div>
-
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
-/* Mouse reactive background */
-const bg = document.getElementById("bg");
-document.addEventListener("mousemove", (e) => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 30;
-    const y = (e.clientY / window.innerHeight - 0.5) * 30;
-    bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
-});
-
 // Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB2cWCYGCDJuSaBpgbm0Mpu7-Q8ucsLGEA",
@@ -262,99 +265,133 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Bulletin updates
+// Bulletin listener
 const bulletinEl = document.getElementById("bulletin");
-db.ref('bulletin').on('value', (snapshot) => {
+db.ref("bulletin/message").on("value", snapshot => {
     const msg = snapshot.val();
-    bulletinEl.textContent = msg || "No messages currently";
+    bulletinEl.textContent = msg ? msg : "";
 });
 
-// Admin login and update
-const adminBtn = document.getElementById("adminButton");
+// Admin login
+const adminBtn = document.getElementById("adminBtn");
 adminBtn.addEventListener("click", () => {
-    const password = prompt("Enter admin password:");
-    if(password === "Colvin12.") {
-        const newMsg = prompt("Enter bulletin message:");
-        if(newMsg !== null) {
-            db.ref('bulletin').set(newMsg);
-        }
+    const pass = prompt("Enter admin password:");
+    if(pass === "Colvin12.") {
+        const newMsg = prompt("Enter new bulletin message:");
+        if(newMsg !== null) db.ref("bulletin/message").set(newMsg);
     } else {
-        alert("Incorrect password.");
+        alert("Incorrect password");
     }
+});
+</script>
+
+<script>
+/* Mouse reactive background */
+const bg = document.getElementById("bg");
+document.addEventListener("mousemove", (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 30;
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
+    bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
 });
 
 /* Twitch + YouTube switching */
 const CLIENT_ID = "fiymv8n5jpz24y9xzj471pp1kvqvc5";
 const CLIENT_SECRET = "9arqj32z9d5owge40cngaakm6fwa75";
-
-const CHANNELS_PRIORITY = [
-    "scorpionthedemon",
-    "mookei",
-    "SmartiesBoby",
-    "SmartiesLara",
-    "SmartiesNeko",
-    "SmartiesVivi"
-];
+const MAIN_CHANNEL = "scorpionthedemon";
 
 const player = document.getElementById("mainPlayer");
 const chatFrame = document.getElementById("chatFrame");
 const playerTitle = document.getElementById("playerTitle");
 
-const YOUTUBE_PLAYLIST = "PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
+// YouTube playlist (with proper looping at end)
+const YT_PLAYLIST_ID = "PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
+const youtubeEmbed = `https://www.youtube.com/embed?listType=playlist&list=${YT_PLAYLIST_ID}&autoplay=1&mute=1&loop=1&playlist=${YT_PLAYLIST_ID}`;
 
-function getTwitchEmbed(channel) {
-    return `https://player.twitch.tv/?channel=${channel}&parent=scorpionthedemon.github.io`;
-}
+// Smarties team members (Mookei first)
+const SMARTIES_MEMBERS = [
+    "mookei","peach","froggyhoppins","YokaSiri","KitsuAisu","DeliciaRin",
+    "Boesschen","Nyansie","AquaGunn","imzenu","SunshiSunshu","Kabooks","Emi_does_crime"
+];
 
-function getChatEmbed(channel) {
-    return `https://www.twitch.tv/embed/${channel}/chat?parent=scorpionthedemon.github.io&darkpopout`;
-}
+// Start with YouTube
+player.src = youtubeEmbed;
+chatFrame.src = `https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
 
-// YouTube embed with proper loop
-function getYoutubeEmbed() {
-    return `https://www.youtube.com/embed?listType=playlist&list=${YOUTUBE_PLAYLIST}&autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_PLAYLIST}`;
-}
-
+// Fetch Twitch access token
 async function getAccessToken() {
     const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {method:"POST"});
     const data = await res.json();
     return data.access_token;
 }
 
-async function checkLive() {
-    try {
+// Shuffle array helper
+function shuffleArray(array){ return array.sort(() => Math.random()-0.5); }
+
+// Check live streams
+async function checkLive(){
+    try{
         const token = await getAccessToken();
-        for(const channel of CHANNELS_PRIORITY) {
-            const res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${channel}`, {
-                headers: {
-                    "Client-ID": CLIENT_ID,
-                    "Authorization": `Bearer ${token}`
-                }
+
+        // Check main channel
+        let res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${MAIN_CHANNEL}`, {
+            headers:{ "Client-ID":CLIENT_ID, "Authorization":`Bearer ${token}` }
+        });
+        let data = await res.json();
+
+        if(data.data && data.data.length>0){
+            // Main channel live
+            if(!player.src.includes("twitch.tv")){
+                player.src = `https://player.twitch.tv/?channel=${MAIN_CHANNEL}&parent=${location.hostname}`;
+            }
+            playerTitle.textContent = `Smarties Live: ${MAIN_CHANNEL}`;
+            chatFrame.src = `https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
+            return;
+        }
+
+        // Check Smarties team in random order
+        let shuffled = shuffleArray([...SMARTIES_MEMBERS]);
+        let liveMember = null;
+        for(const member of shuffled){
+            res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${member}`, {
+                headers:{ "Client-ID":CLIENT_ID, "Authorization":`Bearer ${token}` }
             });
-            const data = await res.json();
-            if(data.data && data.data.length > 0) {
-                player.src = getTwitchEmbed(channel);
-                chatFrame.src = getChatEmbed(channel);
-                playerTitle.textContent = `Live on Twitch: ${channel}`;
-                return;
+            data = await res.json();
+            if(data.data && data.data.length>0){
+                liveMember = member;
+                break;
             }
         }
-        // No Twitch live channels, play YouTube
-        player.src = getYoutubeEmbed();
-        chatFrame.src = getChatEmbed("scorpionthedemon");
-        playerTitle.textContent = "Playing YouTube Playlist";
-    } catch(err) {
+
+        if(liveMember){
+            if(!player.src.includes(liveMember)){
+                player.src = `https://player.twitch.tv/?channel=${liveMember}&parent=${location.hostname}`;
+            }
+            playerTitle.textContent = `Smarties Live: ${liveMember}`;
+            chatFrame.src = `https://www.twitch.tv/embed/${liveMember}/chat?parent=${location.hostname}&darkpopout`;
+            return;
+        }
+
+        // Otherwise, fallback to YouTube
+        if(!player.src.includes("youtube.com")){
+            player.src = youtubeEmbed;
+        }
+        playerTitle.textContent = "YouTube Playlist Active";
+        chatFrame.src = `https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
+
+    }catch(err){
         console.error(err);
-        player.src = getYoutubeEmbed();
-        chatFrame.src = getChatEmbed("scorpionthedemon");
-        playerTitle.textContent = "Playing YouTube Playlist";
+        if(!player.src.includes("youtube.com")){
+            player.src = youtubeEmbed;
+            playerTitle.textContent = "YouTube Playlist Active";
+            chatFrame.src = `https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
+        }
     }
 }
 
+// Run every 60 seconds
 checkLive();
-setInterval(checkLive, 60000);
+setInterval(checkLive,60000);
 
 </script>
-
 </body>
 </html>
