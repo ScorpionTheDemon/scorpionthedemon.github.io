@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
-
 /* RESET */
 * {margin:0; padding:0; box-sizing:border-box;}
 body {
@@ -157,6 +157,7 @@ body {
 }
 
 </style>
+
 </head>
 <body>
 
@@ -173,18 +174,19 @@ body {
 
 <div class="main-layout">
 
-    <div class="stream-container">
-        <iframe id="mainPlayer" allowfullscreen></iframe>
-    </div>
+```
+<div class="stream-container">
+    <iframe id="mainPlayer" allowfullscreen></iframe>
+</div>
 
-    <div class="chat-container">
-        <iframe src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io"></iframe>
-    </div>
+<div class="chat-container">
+    <iframe src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io"></iframe>
+</div>
+```
 
 </div>
 
 <script>
-
 /* Mouse reactive background */
 const bg = document.getElementById("bg");
 document.addEventListener("mousemove", (e) => {
@@ -193,25 +195,24 @@ document.addEventListener("mousemove", (e) => {
     bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
 });
 
-/* Twitch + YouTube switching */
+/* Twitch + YouTube switching with friends priority */
 const CLIENT_ID = "fiymv8n5jpz24y9xzj471pp1kvqvc5";
 const CLIENT_SECRET = "9arqj32z9d5owge40cngaakm6fwa75";
-const CHANNEL = "scorpionthedemon";
-
-const twitchEmbed = `https://player.twitch.tv/?channel=${CHANNEL}&parent=scorpionthedemon.github.io`;
-
-// YouTube playlist fix: loop all videos
-const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
+const CHANNELS = [
+    "scorpionthedemon",
+    "marggyonvt",
+    "idollplushie",
+    "uwoslab"
+];
 
 const player = document.getElementById("mainPlayer");
 
-// Start on YouTube by default
-player.src = youtubeEmbed;
+// YouTube playlist fix: loop all videos
+const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
+player.src = youtubeEmbed; // start default
 
 async function getAccessToken() {
-    const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {
-        method: "POST"
-    });
+    const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, { method: "POST" });
     const data = await res.json();
     return data.access_token;
 }
@@ -220,25 +221,26 @@ async function checkLive() {
     try {
         const token = await getAccessToken();
 
-        const res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${CHANNEL}`, {
-            headers: {
-                "Client-ID": CLIENT_ID,
-                "Authorization": `Bearer ${token}`
+        for (const channel of CHANNELS) {
+            const res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${channel}`, {
+                headers: {
+                    "Client-ID": CLIENT_ID,
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            const data = await res.json();
+            if (data.data && data.data.length > 0) {
+                const twitchEmbed = `https://player.twitch.tv/?channel=${channel}&parent=scorpionthedemon.github.io`;
+                if (!player.src.includes(channel)) {
+                    player.src = twitchEmbed;
+                }
+                return; // stop at the first live channel
             }
-        });
+        }
 
-        const data = await res.json();
-
-        if (data.data && data.data.length > 0) {
-            // Only switch if not already on Twitch
-            if (!player.src.includes("twitch.tv")) {
-                player.src = twitchEmbed;
-            }
-        } else {
-            // Only switch back to YouTube if not already on YouTube
-            if (!player.src.includes("youtube.com")) {
-                player.src = youtubeEmbed;
-            }
+        // If none live, show YouTube
+        if (!player.src.includes("youtube.com")) {
+            player.src = youtubeEmbed;
         }
 
     } catch (err) {
@@ -249,8 +251,8 @@ async function checkLive() {
     }
 }
 
-// Check every 60 seconds
-setInterval(checkLive, 60000);
+setInterval(checkLive, 60000); // check every 60s
+checkLive(); // initial check
 
 </script>
 
