@@ -127,14 +127,43 @@ body {
     z-index:2;
 }
 
-/* PLAYER TITLE */
+/* Admin login & input */
+#adminControls {
+    position:absolute;
+    top:350px; /* below bulletin */
+    width:100%;
+    text-align:center;
+    z-index:2;
+    display:none; /* hidden until correct password */
+}
+
+#adminControls input[type="text"] {
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    padding:5px;
+    width:300px;
+    max-width:90%;
+}
+
+#adminControls button {
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    padding:5px 10px;
+    margin-left:5px;
+    background:#7e22ce;
+    color:#c084ff;
+    border:none;
+    cursor:pointer;
+}
+
+/* Player Title */
 .player-title {
     position:absolute;
     width:65vw;
     max-width:1100px;
     left:50%;
     transform:translateX(-50%);
-    top:360px; /* below bulletin */
+    top:390px; /* below bulletin + admin controls */
     text-align:center;
     font-size:14px;
     letter-spacing:3px;
@@ -151,9 +180,9 @@ body {
     display:flex;
     justify-content:center;
     align-items:flex-start;
-    height:calc(100vh - 420px); /* enough space for Giratina + bulletin + title */
+    height:calc(100vh - 440px); /* enough space for Giratina + bulletin + admin + title */
     gap:20px;
-    padding-top:420px; /* reserve space from top */
+    padding-top:440px; /* reserve space from top */
 }
 
 .stream-container {
@@ -207,6 +236,19 @@ body {
 
 <div class="bulletin" id="bulletin">Welcome to the site!</div>
 
+<!-- Admin login button -->
+<div id="adminLoginContainer" style="position:absolute;top:350px;width:100%;text-align:center;z-index:2;">
+    <button id="adminLoginButton" style="font-family:'Press Start 2P', monospace;font-size:12px;padding:5px 10px;background:#7e22ce;color:#c084ff;border:none;cursor:pointer;">
+        Admin Login
+    </button>
+</div>
+
+<!-- Admin input field -->
+<div id="adminControls">
+    <input type="text" id="bulletinInput" placeholder="Enter new bulletin message">
+    <button onclick="updateBulletin(bulletinInput.value)">Update Bulletin</button>
+</div>
+
 <div class="player-title" id="playerTitle">Loading stream/video...</div>
 
 <div class="main-layout">
@@ -243,18 +285,22 @@ const bulletinRef = db.ref("bulletin");
 
 // Owner password
 const OWNER_PASSWORD = "Colvin12";
-
-// Prompt for password once per session
 let isOwner = false;
-if(sessionStorage.getItem("ownerVerified") !== "true"){
+
+// Admin login button
+const adminLoginButton = document.getElementById("adminLoginButton");
+const adminControls = document.getElementById("adminControls");
+
+adminLoginButton.addEventListener("click", () => {
     const pw = prompt("Enter bulletin password:");
     if(pw === OWNER_PASSWORD){
         isOwner = true;
-        sessionStorage.setItem("ownerVerified","true");
+        adminControls.style.display = "block";
+        alert("Access granted! You can now update the bulletin.");
+    }else{
+        alert("Incorrect password.");
     }
-}else{
-    isOwner = true;
-}
+});
 
 // Listen for bulletin updates
 bulletinRef.on("value", (snapshot) => {
@@ -266,6 +312,7 @@ bulletinRef.on("value", (snapshot) => {
 function updateBulletin(message){
     if(isOwner){
         bulletinRef.set(message);
+        document.getElementById("bulletinInput").value = "";
     }else{
         alert("Only the owner can post to the bulletin!");
     }
