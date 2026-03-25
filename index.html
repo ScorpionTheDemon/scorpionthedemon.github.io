@@ -236,7 +236,7 @@ body {
         <iframe id="mainPlayer" allowfullscreen></iframe>
     </div>
     <div class="chat-container">
-        <iframe id="twitchChat" src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout" allowfullscreen></iframe>
+        <iframe id="twitchChat" src="" allowfullscreen></iframe>
     </div>
 </div>
 
@@ -317,8 +317,13 @@ async function checkLive() {
             const data = await res.json();
             if (data.data && data.data.length > 0) {
                 player.src = `https://player.twitch.tv/?channel=${ch}&parent=scorpionthedemon.github.io`;
-                twitchChat.src = `https://www.twitch.tv/embed/${ch}/chat?parent=scorpionthedemon.github.io&darkpopout`;
                 playerTitle.innerText = `Currently Playing: Twitch Stream - ${ch}`;
+                // Show chat for this streamer
+                if(ch === "scorpionthedemon") {
+                    twitchChat.src = `https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout`;
+                } else {
+                    twitchChat.src = `https://www.twitch.tv/embed/${ch}/chat?parent=scorpionthedemon.github.io&darkpopout`;
+                }
                 foundLive = true;
                 break;
             }
@@ -326,15 +331,16 @@ async function checkLive() {
 
         if (!foundLive) {
             player.src = YOUTUBE_EMBED;
-            twitchChat.src = "";
             playerTitle.innerText = "Currently Playing: YouTube Playlist";
+            // Use ScorpionTheDemon chat for YouTube
+            twitchChat.src = `https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout`;
         }
 
     } catch(err) {
         console.error(err);
         player.src = YOUTUBE_EMBED;
-        twitchChat.src = "";
         playerTitle.innerText = "Currently Playing: YouTube Playlist";
+        twitchChat.src = `https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout`;
     }
 }
 
