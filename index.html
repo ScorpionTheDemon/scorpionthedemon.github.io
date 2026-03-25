@@ -239,7 +239,7 @@ body {
 <script>
 // Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyB2cWCYGCDJuSaBpgbm0Mpu7-Q8ucsLGEA",
+  apiKey: "AIzaSy...",
   authDomain: "scorpionthedemon-website.firebaseapp.com",
   databaseURL: "https://scorpionthedemon-website-default-rtdb.firebaseio.com",
   projectId: "scorpionthedemon-website",
@@ -252,12 +252,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Bulletin
 db.ref("bulletin/message").on("value", snap=>{
   document.getElementById("bulletin").textContent = snap.val() || "";
 });
 
-// Admin
 document.getElementById("adminBtn").onclick=()=>{
   const pass = prompt("Enter admin password:");
   if(pass==="Colvin12."){
@@ -268,47 +266,31 @@ document.getElementById("adminBtn").onclick=()=>{
 </script>
 
 <script>
-// TOKEN CACHE FIX
-let cachedToken = null;
-let tokenExpiry = 0;
-
+// TOKEN CACHE
+let cachedToken=null, tokenExpiry=0;
 async function token(){
-    const now = Date.now();
-
-    if(cachedToken && now < tokenExpiry){
-        return cachedToken;
-    }
-
-    const r = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {
-        method:"POST"
-    });
-
-    const data = await r.json();
-
-    cachedToken = data.access_token;
-    tokenExpiry = now + (data.expires_in - 60) * 1000;
-
-    return cachedToken;
+ if(cachedToken && Date.now()<tokenExpiry) return cachedToken;
+ const r=await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`,{method:"POST"});
+ const d=await r.json();
+ cachedToken=d.access_token;
+ tokenExpiry=Date.now()+(d.expires_in-60)*1000;
+ return cachedToken;
 }
 
 // STREAM SYSTEM
 const CLIENT_ID="fiymv8n5jpz24y9xzj471pp1kvqvc5";
 const CLIENT_SECRET="9arqj32z9d5owge40cngaakm6fwa75";
 const MAIN_CHANNEL="scorpionthedemon";
-const SMARTIES=[
-"mookei","peach","froggyhoppins","YokaSiri","KitsuAisu","DeliciaRin",
-"Boesschen","Nyansie","AquaGunn","imzenu","SunshiSunshu","Kabooks","Emi_does_crime"
-];
+const SMARTIES=["mookei","peach","froggyhoppins","YokaSiri","KitsuAisu","DeliciaRin","Boesschen","Nyansie","AquaGunn","imzenu","SunshiSunshu","Kabooks","Emi_does_crime"];
 
 const player=document.getElementById("mainPlayer");
 const chat=document.getElementById("chatFrame");
 const title=document.getElementById("playerTitle");
 
+let currentMode="";
+
 const playlist="PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
 const yt=`https://www.youtube.com/embed?listType=playlist&list=${playlist}&autoplay=1&mute=1&loop=1&playlist=${playlist}`;
-
-player.src=yt;
-chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
 
 function shuffle(a){return a.sort(()=>Math.random()-0.5);}
 
@@ -319,9 +301,12 @@ async function check(){
  let d=await r.json();
 
  if(d.data?.length){
-   player.src=`https://player.twitch.tv/?channel=${MAIN_CHANNEL}&parent=${location.hostname}`;
-   chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
-   title.textContent=`Smarties Live: ${MAIN_CHANNEL}`;
+   if(currentMode!=="main"){
+     player.src=`https://player.twitch.tv/?channel=${MAIN_CHANNEL}&parent=${location.hostname}`;
+     chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
+     title.textContent=`Smarties Live: ${MAIN_CHANNEL}`;
+     currentMode="main";
+   }
    return;
  }
 
@@ -329,16 +314,22 @@ async function check(){
    r=await fetch(`https://api.twitch.tv/helix/streams?user_login=${u}`,{headers:{"Client-ID":CLIENT_ID,"Authorization":`Bearer ${t}`}});
    d=await r.json();
    if(d.data?.length){
-     player.src=`https://player.twitch.tv/?channel=${u}&parent=${location.hostname}`;
-     chat.src=`https://www.twitch.tv/embed/${u}/chat?parent=${location.hostname}&darkpopout`;
-     title.textContent=`Smarties Live: ${u}`;
+     if(currentMode!==u){
+       player.src=`https://player.twitch.tv/?channel=${u}&parent=${location.hostname}`;
+       chat.src=`https://www.twitch.tv/embed/${u}/chat?parent=${location.hostname}&darkpopout`;
+       title.textContent=`Smarties Live: ${u}`;
+       currentMode=u;
+     }
      return;
    }
  }
 
- player.src=yt;
- chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
- title.textContent="YouTube Playlist Active";
+ if(currentMode!=="youtube"){
+   player.src=yt;
+   chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
+   title.textContent="YouTube Playlist Active";
+   currentMode="youtube";
+ }
 }
 
 check();
