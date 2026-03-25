@@ -61,7 +61,7 @@ body {
         0 0 30px #4c1d95;
 }
 
-/* 🔥 GIRATINA GIF */
+/* 🔥 GIRATINA CONTAINER */
 .giratina-gif {
     position:absolute;
     top:60px;
@@ -71,20 +71,53 @@ body {
     pointer-events:none;
 }
 
-.giratina-gif img {
+/* SHADOW CLONES */
+.clone {
+    position:absolute;
     width:180px;
     max-width:40vw;
-    opacity:0.9;
+    opacity:0.25;
+    filter: blur(4px) drop-shadow(0 0 20px #7e22ce);
+}
+
+/* left clone */
+.clone.left {
+    transform: translateX(-40px) scale(1.05);
+    animation: floatCloneLeft 7s ease-in-out infinite;
+}
+
+/* right clone */
+.clone.right {
+    transform: translateX(40px) scale(1.05);
+    animation: floatCloneRight 8s ease-in-out infinite;
+}
+
+@keyframes floatCloneLeft {
+    0% { transform: translateX(-40px) translateY(0px); }
+    50% { transform: translateX(-50px) translateY(-10px); }
+    100% { transform: translateX(-40px) translateY(0px); }
+}
+
+@keyframes floatCloneRight {
+    0% { transform: translateX(40px) translateY(0px); }
+    50% { transform: translateX(50px) translateY(-12px); }
+    100% { transform: translateX(40px) translateY(0px); }
+}
+
+/* MAIN GIRATINA */
+.giratina-main {
+    width:180px;
+    max-width:40vw;
+    opacity:0.95;
 
     filter:
         drop-shadow(0 0 10px #a855f7)
         drop-shadow(0 0 25px #7e22ce);
 
-    animation: float 6s ease-in-out infinite;
+    animation: floatMain 6s ease-in-out infinite;
 }
 
-/* FLOAT ANIMATION */
-@keyframes float {
+@keyframes floatMain {
     0% { transform: translateY(0px); }
     50% { transform: translateY(-12px); }
     100% { transform: translateY(0px); }
@@ -162,9 +195,20 @@ body {
     SCORPION // THE // DEMON
 </div>
 
-<!-- 🔥 GIRATINA -->
+<!-- 🔥 GIRATINA + SHADOW CLONES -->
 <div class="giratina-gif">
-    <img src="https://media.tenor.com/3z6a7P1K2bQAAAAC/giratina.gif">
+
+    <img class="clone left"
+         src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
+
+    <img id="giratinaImg"
+         class="giratina-main"
+         src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif"
+         alt="Giratina">
+
+    <img class="clone right"
+         src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
+
 </div>
 
 <div class="main-layout">
@@ -187,6 +231,7 @@ body {
 </div>
 
 <script>
+/* Mouse reactive background */
 const bg = document.getElementById("bg");
 
 document.addEventListener("mousemove", (e) => {
@@ -195,6 +240,12 @@ document.addEventListener("mousemove", (e) => {
 
     bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
 });
+
+/* Fallback image */
+const img = document.getElementById("giratinaImg");
+img.onerror = () => {
+    img.src = "https://play.pokemonshowdown.com/sprites/gen5ani/giratina-origin.gif";
+};
 </script>
 
 </body>
