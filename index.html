@@ -200,10 +200,13 @@ const CHANNEL = "scorpionthedemon";
 
 const twitchEmbed = `https://player.twitch.tv/?channel=${CHANNEL}&parent=scorpionthedemon.github.io`;
 
-// Fixed YouTube playlist URL: added &playlist=<same playlist ID> to loop properly
+// YouTube playlist fix: loop all videos
 const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
 
 const player = document.getElementById("mainPlayer");
+
+// Start on YouTube by default
+player.src = youtubeEmbed;
 
 async function getAccessToken() {
     const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {
@@ -227,18 +230,26 @@ async function checkLive() {
         const data = await res.json();
 
         if (data.data && data.data.length > 0) {
-            player.src = twitchEmbed;
+            // Only switch if not already on Twitch
+            if (!player.src.includes("twitch.tv")) {
+                player.src = twitchEmbed;
+            }
         } else {
-            player.src = youtubeEmbed;
+            // Only switch back to YouTube if not already on YouTube
+            if (!player.src.includes("youtube.com")) {
+                player.src = youtubeEmbed;
+            }
         }
 
     } catch (err) {
         console.error(err);
-        player.src = youtubeEmbed;
+        if (!player.src.includes("youtube.com")) {
+            player.src = youtubeEmbed;
+        }
     }
 }
 
-checkLive();
+// Check every 60 seconds
 setInterval(checkLive, 60000);
 
 </script>
