@@ -74,10 +74,20 @@ body {
 .giratina-gif img {
     width:180px;
     max-width:40vw;
+    opacity:0.9;
+
     filter:
         drop-shadow(0 0 10px #a855f7)
         drop-shadow(0 0 25px #7e22ce);
-    opacity:0.9;
+
+    animation: float 6s ease-in-out infinite;
+}
+
+/* FLOAT ANIMATION */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0px); }
 }
 
 /* LAYOUT */
@@ -87,7 +97,7 @@ body {
     align-items:center;
     height:100vh;
     gap:20px;
-    padding-top:140px; /* pushed down to make room for gif */
+    padding-top:140px;
 }
 
 /* STREAM */
@@ -99,6 +109,7 @@ body {
     border-radius:12px;
     overflow:hidden;
     background:black;
+
     box-shadow:
         0 0 30px rgba(168,85,247,0.5),
         inset 0 0 20px rgba(0,0,0,0.8);
@@ -151,9 +162,9 @@ body {
     SCORPION // THE // DEMON
 </div>
 
-<!-- 🔥 GIF -->
+<!-- 🔥 GIRATINA -->
 <div class="giratina-gif">
-    <img src="https://ac-o.namu.la/20210226/07e42a1b0dbc5c0cb24bb9cc0f6ea231028ffaffb0c0601bf055b86266255011.mp4.gif?expires=1774456209&key=XaY8LzHX6j4nPXiFN5wxPQ&type=orig">
+    <img src="https://media.tenor.com/3z6a7P1K2bQAAAAC/giratina.gif">
 </div>
 
 <div class="main-layout">
