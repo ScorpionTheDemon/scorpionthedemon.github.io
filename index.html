@@ -17,22 +17,17 @@ body {
     background:black;
 }
 
-/* 🔥 DISTORTION WORLD BACKGROUND */
+/* 🔥 BACKGROUND */
 .bg {
     position:fixed;
     width:110%;
     height:110%;
     top:-5%;
     left:-5%;
-
     background: url("https://cdna.artstation.com/p/assets/images/images/037/369/240/large/caleb-waldrop-joey-mora-screenshot-107.jpg?1620203977") no-repeat center center;
     background-size: cover;
-
     z-index:-2;
-
-    /* base animation */
     animation: drift 30s ease-in-out infinite alternate;
-
     transition: transform 0.2s ease-out;
 }
 
@@ -42,7 +37,7 @@ body {
     100% { transform: scale(1.05) translate(10px, -10px); }
 }
 
-/* DARK OVERLAY */
+/* OVERLAY */
 .overlay {
     position:fixed;
     width:100%;
@@ -66,6 +61,25 @@ body {
         0 0 30px #4c1d95;
 }
 
+/* 🔥 GIRATINA GIF */
+.giratina-gif {
+    position:absolute;
+    top:60px;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    pointer-events:none;
+}
+
+.giratina-gif img {
+    width:180px;
+    max-width:40vw;
+    filter:
+        drop-shadow(0 0 10px #a855f7)
+        drop-shadow(0 0 25px #7e22ce);
+    opacity:0.9;
+}
+
 /* LAYOUT */
 .main-layout {
     display:flex;
@@ -73,7 +87,7 @@ body {
     align-items:center;
     height:100vh;
     gap:20px;
-    padding-top:60px;
+    padding-top:140px; /* pushed down to make room for gif */
 }
 
 /* STREAM */
@@ -85,7 +99,6 @@ body {
     border-radius:12px;
     overflow:hidden;
     background:black;
-
     box-shadow:
         0 0 30px rgba(168,85,247,0.5),
         inset 0 0 20px rgba(0,0,0,0.8);
@@ -114,6 +127,7 @@ body {
 @media(max-width:900px){
     .main-layout {
         flex-direction:column;
+        padding-top:160px;
     }
 
     .stream-container {
@@ -137,9 +151,14 @@ body {
     SCORPION // THE // DEMON
 </div>
 
+<!-- 🔥 GIF -->
+<div class="giratina-gif">
+    <img src="https://ac-o.namu.la/20210226/07e42a1b0dbc5c0cb24bb9cc0f6ea231028ffaffb0c0601bf055b86266255011.mp4.gif?expires=1774456209&key=XaY8LzHX6j4nPXiFN5wxPQ&type=orig">
+</div>
+
 <div class="main-layout">
 
-    <!-- TWITCH STREAM -->
+    <!-- STREAM -->
     <div class="stream-container">
         <iframe
             src="https://player.twitch.tv/?channel=scorpionthedemon&parent=scorpionthedemon.github.io"
@@ -147,7 +166,7 @@ body {
         </iframe>
     </div>
 
-    <!-- TWITCH CHAT -->
+    <!-- CHAT -->
     <div class="chat-container">
         <iframe
             src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io">
