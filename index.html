@@ -132,7 +132,8 @@ body {
 
 /* BULLETIN */
 .bulletin {
-    width:100%;
+    width:65vw;
+    max-width:1100px;
     text-align:center;
     font-size:14px;
     color:#c084ff;
@@ -140,17 +141,18 @@ body {
         0 0 5px #a855f7,
         0 0 15px #7e22ce,
         0 0 30px #4c1d95;
-    margin-top:300px;
+    margin:200px auto 10px; /* placed under Giratina */
 }
 
-/* Bulletin input (visible only to you) */
+/* Bulletin input (hidden until password) */
 .bulletin-input {
     width:65vw;
     max-width:1100px;
-    margin:10px auto;
+    margin:5px auto 15px;
     display:flex;
     justify-content:center;
     gap:5px;
+    display:none; /* hidden by default */
 }
 
 .bulletin-input input {
@@ -194,10 +196,9 @@ body {
     display:flex;
     justify-content:center;
     align-items:flex-start;
-    height:100vh;
     gap:20px;
-    padding-top:400px;
-    flex-direction: row;
+    padding-top:20px;
+    flex-direction:row;
 }
 
 .stream-wrapper {
@@ -293,22 +294,29 @@ document.addEventListener("mousemove", (e) => {
 const bulletin = document.getElementById("bulletin");
 db.ref('bulletin').on('value', (snapshot) => {
     const data = snapshot.val();
-    if(data && data.message){
-        bulletin.textContent = data.message;
-    } else {
-        bulletin.textContent = "";
-    }
+    bulletin.textContent = data && data.message ? data.message : "";
 });
+
 function updateBulletin(message, user="owner"){
     if(user==="owner"){
         db.ref('bulletin').set({ message: message });
     }
 }
+
 function postBulletin(){
     const msg = document.getElementById("bulletinText").value.trim();
     if(msg) updateBulletin(msg,"owner");
     document.getElementById("bulletinText").value = "";
 }
+
+/* Prompt for owner password to show input */
+const OWNER_PASSWORD = "yourpassword"; // <- change this to your secret password
+setTimeout(() => {
+    const pw = prompt("Enter bulletin password:");
+    if(pw === OWNER_PASSWORD){
+        document.getElementById("bulletinInput").style.display = "flex";
+    }
+}, 500);
 
 /* Twitch + YouTube switching */
 const CLIENT_ID = "fiymv8n5jpz24y9xzj471pp1kvqvc5";
@@ -341,7 +349,6 @@ async function checkLive() {
             });
             const data = await res.json();
             if(data.data && data.data.length>0){
-                // Live stream found
                 if(!player.src.includes(channel)){
                     player.src = twitchEmbed(channel);
                     playerTitle.textContent = `Twitch: ${channel}`;
@@ -374,6 +381,7 @@ async function checkLive() {
 // Initial load
 checkLive();
 setInterval(checkLive, 60000);
+
 </script>
 
 </body>
