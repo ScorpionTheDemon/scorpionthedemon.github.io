@@ -119,7 +119,7 @@ body {
     align-items:flex-start;
     height:100vh;
     gap:20px;
-    padding-top:280px; /* moved everything down for bulletin */
+    padding-top:380px; /* moved down for bulletin below Giratina */
 }
 
 .stream-container {
@@ -172,7 +172,7 @@ body {
 /* BULLETIN */
 .bulletin {
     position:absolute;
-    top:180px; 
+    top:280px; /* below Giratina */
     width:100%;
     text-align:center;
     font-size:12px;
@@ -186,15 +186,26 @@ body {
 /* ADMIN BUTTON */
 #adminBtn {
     position:absolute;
-    top:220px;
+    top:320px;
     left:50%;
     transform:translateX(-50%);
+    font-family:'Press Start 2P', monospace;
+    color:#c084ff;
+    background:transparent;
+    border:2px solid #7e22ce;
+    border-radius:6px;
+    padding:6px 12px;
+    text-shadow:
+        0 0 5px #a855f7,
+        0 0 15px #7e22ce,
+        0 0 30px #4c1d95;
+    cursor:pointer;
     z-index:2;
 }
 
 /* MOBILE */
 @media(max-width:900px){
-    .main-layout {flex-direction:column; padding-top:400px;}
+    .main-layout {flex-direction:column; padding-top:500px;}
     .stream-container {width:95vw;}
     .chat-container {width:95vw;height:400px;}
     .player-title {width:95vw;}
@@ -218,12 +229,11 @@ body {
 <div class="bulletin" id="bulletin">Welcome to the stream!</div>
 <button id="adminBtn">Admin Log In</button>
 
-<div class="player-title" id="playerTitle">Loading...</div>
-
 <div class="main-layout">
 
     <div class="stream-container">
         <div id="playerContainer"></div>
+        <div class="player-title" id="playerTitle">Loading...</div>
     </div>
 
     <div class="chat-container">
