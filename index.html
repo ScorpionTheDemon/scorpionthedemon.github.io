@@ -112,32 +112,60 @@ body {
     100% { transform: translateY(0); }
 }
 
+/* BULLETIN */
+.bulletin {
+    position:absolute;
+    top:280px;
+    width:100%;
+    text-align:center;
+    font-size:12px;
+    color:#c084ff;
+    letter-spacing:2px;
+    text-shadow:
+        0 0 5px #a855f7,
+        0 0 15px #7e22ce,
+        0 0 30px #4c1d95;
+    z-index:1;
+}
+
+/* PLAYER TITLE */
+.player-title {
+    position:absolute;
+    width:100%;
+    text-align:center;
+    font-size:12px;
+    color:#c084ff;
+    letter-spacing:2px;
+    text-shadow:
+        0 0 5px #a855f7,
+        0 0 15px #7e22ce,
+        0 0 30px #4c1d95;
+    top:320px;
+}
+
+/* ADMIN BUTTON */
+#adminButton {
+    position:absolute;
+    top:250px;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:'Press Start 2P', monospace;
+    color:#c084ff;
+    background:black;
+    border:3px solid #7e22ce;
+    padding:5px 10px;
+    cursor:pointer;
+    z-index:1;
+}
+
 /* LAYOUT */
 .main-layout {
     display:flex;
     justify-content:center;
     align-items:flex-start;
-    height:100vh;
+    height:calc(100vh - 360px);
     gap:20px;
-    padding-top:280px; /* pushed lower to accommodate Giratina and bulletin */
-}
-
-.stream-section {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:5px;
-}
-
-.player-title {
-    text-align:center;
-    font-size:12px;
-    letter-spacing:2px;
-    color:#c084ff;
-    text-shadow:
-        0 0 3px #a855f7,
-        0 0 10px #7e22ce,
-        0 0 15px #4c1d95;
+    padding-top:360px;
 }
 
 .stream-container {
@@ -167,42 +195,14 @@ body {
     border:2px solid #7e22ce;
 }
 
-/* BULLETIN */
-.bulletin {
-    width:70vw;
-    max-width:1100px;
-    padding:10px 15px;
-    font-size:12px;
-    text-align:center;
-    color:#c084ff;
-    text-shadow:
-        0 0 3px #a855f7,
-        0 0 10px #7e22ce,
-        0 0 15px #4c1d95;
-    border:2px solid #7e22ce;
-    border-radius:8px;
-    background:rgba(0,0,0,0.6);
-}
-
-/* ADMIN BUTTON */
-#adminBtn {
-    margin-top:5px;
-    padding:5px 10px;
-    font-family:'Press Start 2P', monospace;
-    font-size:10px;
-    color:#c084ff;
-    background:black;
-    border:2px solid #7e22ce;
-    border-radius:6px;
-    cursor:pointer;
-}
-
 /* MOBILE */
 @media(max-width:900px){
-    .main-layout {flex-direction:column; padding-top:320px;}
+    .main-layout {flex-direction:column; padding-top:400px;}
     .stream-container {width:95vw;}
     .chat-container {width:95vw;height:400px;}
-    .bulletin {width:95vw;}
+    .bulletin {top:320px;}
+    .player-title {top:360px;}
+    #adminButton {top:300px;}
 }
 
 </style>
@@ -220,38 +220,34 @@ body {
     <img class="clone right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
 </div>
 
+<div class="bulletin" id="bulletin">No messages currently</div>
+<button id="adminButton">Admin Log In</button>
+<div class="player-title" id="playerTitle">Loading...</div>
+
 <div class="main-layout">
 
-    <div class="stream-section">
-
-        <!-- Bulletin -->
-        <div class="bulletin" id="bulletin">Welcome to the stream!</div>
-
-        <!-- Admin Log In -->
-        <button id="adminBtn">Admin Log In</button>
-
-        <!-- Player title -->
-        <div class="player-title" id="playerTitle">Loading...</div>
-
-        <!-- Player -->
-        <div class="stream-container">
-            <iframe id="mainPlayer" allowfullscreen></iframe>
-        </div>
-
+    <div class="stream-container">
+        <iframe id="mainPlayer" allowfullscreen></iframe>
     </div>
 
-    <!-- Chat -->
     <div class="chat-container">
-        <iframe id="chatFrame" src="https://www.twitch.tv/embed/scorpionthedemon/chat?parent=scorpionthedemon.github.io&darkpopout" allowfullscreen></iframe>
+        <iframe id="chatFrame"></iframe>
     </div>
 
 </div>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
+/* Mouse reactive background */
+const bg = document.getElementById("bg");
+document.addEventListener("mousemove", (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 30;
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
+    bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
+});
+
 // Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB2cWCYGCDJuSaBpgbm0Mpu7-Q8ucsLGEA",
@@ -266,118 +262,99 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Bulletin live update
+// Bulletin updates
 const bulletinEl = document.getElementById("bulletin");
 db.ref('bulletin').on('value', (snapshot) => {
-    const val = snapshot.val();
-    if(val) bulletinEl.textContent = val;
+    const msg = snapshot.val();
+    bulletinEl.textContent = msg || "No messages currently";
 });
 
-// Admin password logic
-const adminBtn = document.getElementById("adminBtn");
-adminBtn.addEventListener('click', () => {
-    const pw = prompt("Enter Admin Password:");
-    if(pw === "Colvin12.") {
-        const newMsg = prompt("Enter new bulletin message:");
-        if(newMsg) db.ref('bulletin').set(newMsg);
+// Admin login and update
+const adminBtn = document.getElementById("adminButton");
+adminBtn.addEventListener("click", () => {
+    const password = prompt("Enter admin password:");
+    if(password === "Colvin12.") {
+        const newMsg = prompt("Enter bulletin message:");
+        if(newMsg !== null) {
+            db.ref('bulletin').set(newMsg);
+        }
     } else {
         alert("Incorrect password.");
     }
 });
 
-/* Mouse reactive background */
-const bg = document.getElementById("bg");
-document.addEventListener("mousemove", (e) => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 30;
-    const y = (e.clientY / window.innerHeight - 0.5) * 30;
-    bg.style.transform = `scale(1.05) translate(${x}px, ${y}px)`;
-});
-
-/* Twitch + YouTube player switching with chat sync */
+/* Twitch + YouTube switching */
 const CLIENT_ID = "fiymv8n5jpz24y9xzj471pp1kvqvc5";
 const CLIENT_SECRET = "9arqj32z9d5owge40cngaakm6fwa75";
-const MAIN_CHANNEL = "scorpionthedemon";
-const TEAM_NAME = "smarties";
-const EXTRA_CHANNELS = ["mookei"];
 
-const twitchEmbed = (channel) => `https://player.twitch.tv/?channel=${channel}&parent=scorpionthedemon.github.io`;
-const twitchChat = (channel) => `https://www.twitch.tv/embed/${channel}/chat?parent=scorpionthedemon.github.io&darkpopout`;
-
-const youtubeEmbed = "https://www.youtube.com/embed?listType=playlist&list=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe&autoplay=1&mute=1&loop=1&playlist=PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
+const CHANNELS_PRIORITY = [
+    "scorpionthedemon",
+    "mookei",
+    "SmartiesBoby",
+    "SmartiesLara",
+    "SmartiesNeko",
+    "SmartiesVivi"
+];
 
 const player = document.getElementById("mainPlayer");
 const chatFrame = document.getElementById("chatFrame");
 const playerTitle = document.getElementById("playerTitle");
 
+const YOUTUBE_PLAYLIST = "PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
+
+function getTwitchEmbed(channel) {
+    return `https://player.twitch.tv/?channel=${channel}&parent=scorpionthedemon.github.io`;
+}
+
+function getChatEmbed(channel) {
+    return `https://www.twitch.tv/embed/${channel}/chat?parent=scorpionthedemon.github.io&darkpopout`;
+}
+
+// YouTube embed with proper loop
+function getYoutubeEmbed() {
+    return `https://www.youtube.com/embed?listType=playlist&list=${YOUTUBE_PLAYLIST}&autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_PLAYLIST}`;
+}
+
 async function getAccessToken() {
-    const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {
-        method: "POST"
-    });
+    const res = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials`, {method:"POST"});
     const data = await res.json();
     return data.access_token;
 }
 
-async function checkStreams() {
+async function checkLive() {
     try {
         const token = await getAccessToken();
-        // Channels to check in priority order
-        const channels = [MAIN_CHANNEL, ...EXTRA_CHANNELS];
-
-        // First, check MAIN_CHANNEL
-        const resMain = await fetch(`https://api.twitch.tv/helix/streams?user_login=${MAIN_CHANNEL}`, {
-            headers: {"Client-ID": CLIENT_ID, "Authorization": `Bearer ${token}`}
-        });
-        const dataMain = await resMain.json();
-
-        if(dataMain.data && dataMain.data.length > 0) {
-            // Main channel live
-            player.src = twitchEmbed(MAIN_CHANNEL);
-            chatFrame.src = twitchChat(MAIN_CHANNEL);
-            playerTitle.textContent = `${MAIN_CHANNEL} is Live`;
-            return;
-        }
-
-        // Now check Smarties team members + extras
-        const teamRes = await fetch(`https://api.twitch.tv/helix/teams?name=${TEAM_NAME}`, {
-            headers: {"Client-ID": CLIENT_ID, "Authorization": `Bearer ${token}`}
-        });
-        const teamData = await teamRes.json();
-        let teamUsers = [];
-        if(teamData.data && teamData.data.length > 0) {
-            teamUsers = teamData.data[0].users.map(u => u.login);
-        }
-        teamUsers = [...teamUsers, ...EXTRA_CHANNELS]; // append extras like mookei
-
-        // Check first live team member
-        for(let channel of teamUsers) {
+        for(const channel of CHANNELS_PRIORITY) {
             const res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${channel}`, {
-                headers: {"Client-ID": CLIENT_ID, "Authorization": `Bearer ${token}`}
+                headers: {
+                    "Client-ID": CLIENT_ID,
+                    "Authorization": `Bearer ${token}`
+                }
             });
             const data = await res.json();
             if(data.data && data.data.length > 0) {
-                player.src = twitchEmbed(channel);
-                chatFrame.src = twitchChat(channel);
-                playerTitle.textContent = `${channel} is Live`;
+                player.src = getTwitchEmbed(channel);
+                chatFrame.src = getChatEmbed(channel);
+                playerTitle.textContent = `Live on Twitch: ${channel}`;
                 return;
             }
         }
-
-        // No Twitch live, show YouTube
-        player.src = youtubeEmbed;
-        chatFrame.src = twitchChat(MAIN_CHANNEL);
-        playerTitle.textContent = "YouTube Playlist";
-
+        // No Twitch live channels, play YouTube
+        player.src = getYoutubeEmbed();
+        chatFrame.src = getChatEmbed("scorpionthedemon");
+        playerTitle.textContent = "Playing YouTube Playlist";
     } catch(err) {
         console.error(err);
-        player.src = youtubeEmbed;
-        chatFrame.src = twitchChat(MAIN_CHANNEL);
-        playerTitle.textContent = "YouTube Playlist";
+        player.src = getYoutubeEmbed();
+        chatFrame.src = getChatEmbed("scorpionthedemon");
+        playerTitle.textContent = "Playing YouTube Playlist";
     }
 }
 
-checkStreams();
-setInterval(checkStreams, 60000);
+checkLive();
+setInterval(checkLive, 60000);
 
 </script>
+
 </body>
 </html>
