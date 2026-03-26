@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -199,6 +200,7 @@ body {
 }
 
 </style>
+
 </head>
 <body>
 
@@ -207,19 +209,21 @@ body {
 
 <div class="top-stack">
 
-    <div class="title">SCORPION // THE // DEMON</div>
+```
+<div class="title">SCORPION // THE // DEMON</div>
 
-    <div class="giratina-gif">
-        <img class="clone left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
-        <img class="giratina-main" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
-        <img class="clone right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
-    </div>
+<div class="giratina-gif">
+    <img class="clone left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
+    <img class="giratina-main" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
+    <img class="clone right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
+</div>
 
-    <div class="bulletin" id="bulletin"></div>
+<div class="bulletin" id="bulletin"></div>
 
-    <button class="admin-btn" id="adminBtn">Admin Log In</button>
+<button class="admin-btn" id="adminBtn">Admin Log In</button>
 
-    <div class="player-title" id="playerTitle">YouTube Playlist Active</div>
+<div class="player-title" id="playerTitle">YouTube Playlist Active</div>
+```
 
 </div>
 
@@ -228,12 +232,16 @@ body {
         <iframe id="mainPlayer" allowfullscreen></iframe>
     </div>
 
-    <div class="chat-container">
-        <iframe id="chatFrame"></iframe>
-    </div>
+```
+<div class="chat-container">
+    <iframe id="chatFrame"></iframe>
+</div>
+```
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
@@ -281,54 +289,68 @@ async function token(){
 const CLIENT_ID="fiymv8n5jpz24y9xzj471pp1kvqvc5";
 const CLIENT_SECRET="9arqj32z9d5owge40cngaakm6fwa75";
 const MAIN_CHANNEL="scorpionthedemon";
-const SMARTIES=["mookei","peach","froggyhoppins","YokaSiri","KitsuAisu","DeliciaRin","Boesschen","Nyansie","AquaGunn","imzenu","SunshiSunshu","Kabooks","Emi_does_crime"];
+const SMARTIES=["mookei","peach","froggyhoppins","YokaSiri","KitsuAisu","DeliciaRin","Boesschen","Nyansie","imzenu","SunshiSunshu","Kabooks","Emi_does_crime"];
 
 const player=document.getElementById("mainPlayer");
 const chat=document.getElementById("chatFrame");
 const title=document.getElementById("playerTitle");
 
 let currentMode="";
+let currentStreamer="";
 
 const playlist="PLdFp7yyF5kzvjldbIzt-W8RlFNkywxhfe";
-const yt=`https://www.youtube.com/embed?listType=playlist&list=${playlist}&autoplay=1&mute=1&loop=1&playlist=${playlist}`;
+const yt=`https://www.youtube.com/embed?listType=playlist&list=${playlist}&autoplay=1&mute=1`;
 
-function shuffle(a){return a.sort(()=>Math.random()-0.5);}
+// CHECK LIVE
+async function isLive(user,t){
+ const r=await fetch(`https://api.twitch.tv/helix/streams?user_login=${user}`,{
+  headers:{"Client-ID":CLIENT_ID,"Authorization":`Bearer ${t}`}
+ });
+ const d=await r.json();
+ return d.data?.length;
+}
 
 async function check(){
  const t=await token();
 
- let r=await fetch(`https://api.twitch.tv/helix/streams?user_login=${MAIN_CHANNEL}`,{headers:{"Client-ID":CLIENT_ID,"Authorization":`Bearer ${t}`}});
- let d=await r.json();
+ // YOU
+ if(await isLive(MAIN_CHANNEL,t)){
+  if(currentMode!=="main"){
+   player.src=`https://player.twitch.tv/?channel=${MAIN_CHANNEL}&parent=${location.hostname}`;
+   chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
+   title.textContent=`LIVE NOW: ${MAIN_CHANNEL}`;
+   currentMode="main";
+   currentStreamer=MAIN_CHANNEL;
+  }
+  return;
+ }
 
- if(d.data?.length){
-   if(currentMode!=="main"){
-     player.src=`https://player.twitch.tv/?channel=${MAIN_CHANNEL}&parent=${location.hostname}`;
-     chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
-     title.textContent=`Smarties Live: ${MAIN_CHANNEL}`;
-     currentMode="main";
+ // LOCK CURRENT
+ if(currentMode==="smarties" && currentStreamer){
+  if(await isLive(currentStreamer,t)) return;
+ }
+
+ // FIND FIRST LIVE
+ for(const u of SMARTIES){
+  if(await isLive(u,t)){
+   if(currentStreamer!==u){
+    player.src=`https://player.twitch.tv/?channel=${u}&parent=${location.hostname}`;
+    chat.src=`https://www.twitch.tv/embed/${u}/chat?parent=${location.hostname}&darkpopout`;
+    title.textContent=`Smarties Live: ${u}`;
+    currentMode="smarties";
+    currentStreamer=u;
    }
    return;
+  }
  }
 
- for(const u of shuffle([...SMARTIES])){
-   r=await fetch(`https://api.twitch.tv/helix/streams?user_login=${u}`,{headers:{"Client-ID":CLIENT_ID,"Authorization":`Bearer ${t}`}});
-   d=await r.json();
-   if(d.data?.length){
-     if(currentMode!==u){
-       player.src=`https://player.twitch.tv/?channel=${u}&parent=${location.hostname}`;
-       chat.src=`https://www.twitch.tv/embed/${u}/chat?parent=${location.hostname}&darkpopout`;
-       title.textContent=`Smarties Live: ${u}`;
-       currentMode=u;
-     }
-     return;
-   }
- }
-
+ // YOUTUBE
  if(currentMode!=="youtube"){
-   player.src=yt;
-   chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
-   title.textContent="YouTube Playlist Active";
-   currentMode="youtube";
+  player.src=yt;
+  chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
+  title.textContent="YouTube Playlist Active";
+  currentMode="youtube";
+  currentStreamer="";
  }
 }
 
