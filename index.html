@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -116,16 +115,6 @@ body {
     100% { transform: translateY(0); }
 }
 
-/* SMARTIES LOGO */
-.smarties-logo {
-    width:140px;
-    margin-top:5px;
-    filter:
-        drop-shadow(0 0 6px #a855f7)
-        drop-shadow(0 0 12px #7e22ce);
-    opacity:0.9;
-}
-
 /* BULLETIN */
 .bulletin {
     font-size:14px;
@@ -164,6 +153,19 @@ body {
         0 0 15px #7e22ce,
         0 0 30px #4c1d95;
     text-align:center;
+}
+
+/* SMARTIES LOGO */
+.smarties-logo {
+    width:150px;
+    margin:10px 0;
+    animation: floatLogo 6s ease-in-out infinite;
+}
+
+@keyframes floatLogo {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0); }
 }
 
 /* LAYOUT */
@@ -227,7 +229,10 @@ body {
     <img class="clone right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/487.gif">
 </div>
 
-<img class="smarties-logo" src="https://cdn.discordapp.com/attachments/1422277650180997171/1422278076976336896/SmartiesLogo1.png">
+<!-- Smarties Logo SVG -->
+<svg class="smarties-logo" viewBox="0 0 512 128">
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Press Start 2P" font-size="40" fill="#ff0000" stroke="#ffffff" stroke-width="3">SMARTIES</text>
+</svg>
 
 <div class="bulletin" id="bulletin"></div>
 
@@ -249,7 +254,6 @@ body {
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
@@ -297,7 +301,7 @@ async function token(){
 const CLIENT_ID="fiymv8n5jpz24y9xzj471pp1kvqvc5";
 const CLIENT_SECRET="9arqj32z9d5owge40cngaakm6fwa75";
 const MAIN_CHANNEL="scorpionthedemon";
-const SMARTIES=["mookei","peach","froggyhoppins","yokasiri","kitsuaisu","deliciarin","boesschen","nyansie","imzenu","sunshisunshu","kabooks","emi_does_crime"];
+const SMARTIES=["mookei","peach","froggyhoppins","YokaSiri","KitsuAisu","DeliciaRin","Boesschen","Nyansie","imzenu","SunshiSunshu","Kabooks","Emi_does_crime"];
 
 const player=document.getElementById("mainPlayer");
 const chat=document.getElementById("chatFrame");
@@ -321,9 +325,9 @@ async function isLive(user,t){
 async function check(){
  const t=await token();
 
- // ALWAYS PRIORITIZE MAIN
+ // YOU
  if(await isLive(MAIN_CHANNEL,t)){
-  if(currentStreamer!==MAIN_CHANNEL){
+  if(currentMode!=="main"){
    player.src=`https://player.twitch.tv/?channel=${MAIN_CHANNEL}&parent=${location.hostname}`;
    chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
    title.textContent=`LIVE NOW: ${MAIN_CHANNEL}`;
@@ -333,29 +337,26 @@ async function check(){
   return;
  }
 
- // 🔒 LOCK CURRENT SMARTIES STREAM (DO NOT SWITCH)
+ // LOCK CURRENT
  if(currentMode==="smarties" && currentStreamer){
-  if(await isLive(currentStreamer,t)){
-   return;
-  } else {
-   currentStreamer="";
-   currentMode="";
-  }
+  if(await isLive(currentStreamer,t)) return;
  }
 
- // FIND FIRST LIVE SMARTIES
+ // FIND FIRST LIVE
  for(const u of SMARTIES){
   if(await isLive(u,t)){
-   player.src=`https://player.twitch.tv/?channel=${u}&parent=${location.hostname}`;
-   chat.src=`https://www.twitch.tv/embed/${u}/chat?parent=${location.hostname}&darkpopout`;
-   title.textContent=`Smarties Live: ${u}`;
-   currentMode="smarties";
-   currentStreamer=u;
+   if(currentStreamer!==u){
+    player.src=`https://player.twitch.tv/?channel=${u}&parent=${location.hostname}`;
+    chat.src=`https://www.twitch.tv/embed/${u}/chat?parent=${location.hostname}&darkpopout`;
+    title.textContent=`Smarties Live: ${u}`;
+    currentMode="smarties";
+    currentStreamer=u;
+   }
    return;
   }
  }
 
- // YOUTUBE FALLBACK
+ // YOUTUBE
  if(currentMode!=="youtube"){
   player.src=yt;
   chat.src=`https://www.twitch.tv/embed/${MAIN_CHANNEL}/chat?parent=${location.hostname}&darkpopout`;
